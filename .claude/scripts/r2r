@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# R2R CLI - Main entry point
+# Routes commands to modular scripts
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Show help
+show_help() {
+    cat << EOF
+R2R CLI - Modular Command Interface
+
+USAGE:
+    r2r <command> [options] <arguments>
+
+COMMANDS:
+    search <query> [limit]              Search knowledge base (hybrid search)
+    rag <query> [max_tokens]            RAG query with generation
+    agent <query> [mode] [conv_id]     Agent conversation with tools
+
+GLOBAL FLAGS:
+    --json                              Output raw JSON response
+    --verbose                           Show detailed metadata (search only)
+    --thinking                          Enable extended thinking (agent only)
+
+EXAMPLES:
+    # Search
+    r2r search "machine learning" 5
+    r2r search "neural networks" --verbose
+
+    # RAG
+    r2r rag "Explain transformers"
+    r2r rag "What is R2R?" 6000
+
+    # Agent
+    r2r agent "What is DeepSeek R1?"
+    r2r agent "Complex analysis" research "" 8000 --thinking
+
+For detailed help, see:
+    $SCRIPT_DIR/README.md
+
+For more commands (documents, collections, graphs):
+    $SCRIPT_DIR/r2r_advanced.sh help
+EOF
+}
+
+# Main command dispatcher
+COMMAND="${1:-help}"
+
+case "$COMMAND" in
+    search)
+        shift
+        "${SCRIPT_DIR}/commands/search.sh" "$@"
+        ;;
+
+    rag)
+        shift
+        "${SCRIPT_DIR}/commands/rag.sh" "$@"
+        ;;
+
+    agent)
+        shift
+        "${SCRIPT_DIR}/commands/agent.sh" "$@"
+        ;;
+
+    help|--help|-h)
+        show_help
+        ;;
+
+    *)
+        echo "Error: Unknown command '$COMMAND'" >&2
+        echo "Run 'r2r help' for usage information" >&2
+        exit 1
+        ;;
+esac
