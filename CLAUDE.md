@@ -136,10 +136,10 @@ du -sh docs/r2r docs/fastmcp docs/claude_code
          │ Bash scripts (.claude/scripts/)
          │
 ┌────────▼────────┐
-│  r2r_client.sh  │  search, rag, agent
-│  (Middleware)   │  + r2r_advanced.sh (docs, collections, graphs)
+│ Modular Scripts │  search, rag, agent, docs, collections, graph, analytics
+│  (Middleware)   │  Main: r2r CLI → commands/*.sh → lib/common.sh
 └────────┬────────┘
-         │ curl → R2R v3 REST API
+         │ curl + jq → JSON payloads → R2R v3 REST API
          │
 ┌────────▼────────┐
 │      R2R        │  https://api.136-119-36-216.nip.io
@@ -147,11 +147,14 @@ du -sh docs/r2r docs/fastmcp docs/claude_code
 └─────────────────┘
 ```
 
-**Важно:** Ранее использовался FastMCP bridge (MCP сервер), но он был удален в пользу прямых bash скриптов для упрощения архитектуры.
+**Важно:**
+- Ранее использовался FastMCP bridge (MCP сервер), но удален в пользу прямых bash скриптов
+- Монолитные r2r_client.sh и r2r_advanced.sh заменены модульной структурой commands/
+- **Используется jq для формирования JSON** - избегает проблем с экранированием и валидностью
 
 ### R2R API Defaults
 
-Конфигурация в `r2r_client.sh`:
+Конфигурация в `lib/common.sh`:
 ```bash
 DEFAULT_LIMIT=3                    # Результатов поиска
 DEFAULT_MAX_TOKENS=4000            # Токенов для генерации
@@ -287,8 +290,11 @@ fd -e md authentication docs/
 ### Тестирование R2R интеграции
 
 ```bash
-# Проверка доступности API
-.claude/scripts/r2r_client.sh search "test" 1
+# Проверка доступности API (модульный CLI)
+.claude/scripts/r2r search "test" 1
+
+# Проверка JSON output
+.claude/scripts/r2r search --json "test" 1 | jq .
 
 # Проверка slash команды
 /r2r-search "R2R documentation"
@@ -342,9 +348,17 @@ fd -e md . docs/r2r/ | sort
 
 ### Конфигурация R2R
 - `.claude/config/.env` - API credentials
-- `.claude/scripts/r2r_client.sh` - основной клиент (search, rag, agent)
-- `.claude/scripts/r2r_advanced.sh` - управление (docs, collections, graphs)
-- `.claude/SEARCH_STRATEGIES.md` - troubleshooting для стратегий
+- `.claude/scripts/r2r` - main CLI entry point (dispatcher)
+- `.claude/scripts/lib/common.sh` - shared configuration and utilities
+- `.claude/scripts/commands/` - modular command implementations:
+  - `search.sh` - hybrid search с фильтрами, стратегиями, graph search
+  - `rag.sh` - RAG retrieval + generation
+  - `agent.sh` - multi-turn agent (research/rag modes)
+  - `docs.sh` - document management (list, get, upload, delete)
+  - `collections.sh` - collection management
+  - `graph.sh` - knowledge graph operations
+  - `analytics.sh` - collection/document/system analytics
+- `.claude/docs/SEARCH_STRATEGIES.md` - troubleshooting для стратегий
 
 ### Документация навигация
 - `docs/r2r/README.md` - R2R documentation index
