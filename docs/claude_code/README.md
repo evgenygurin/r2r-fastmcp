@@ -45,65 +45,83 @@
    - Security considerations
 
 6. **[Субагенты](./06-subagents.md)**
-   - Концепция субагентов
-   - Создание специализированных агентов
-   - Best practices для субагентов
+   - Концепция субагентов и их типы
+   - Explore, Plan, Code Explorer, Code Architect
+   - Code Reviewer, Silent Failure Hunter, PR Test Analyzer
+   - Параллельное выполнение субагентов
+   - Создание кастомных агентов
+   - Workflow-примеры и Best practices
 
 ### Интеграции
 
 7. **[MCP Integration](./07-mcp-integration.md)**
    - Что такое Model Context Protocol
-   - Установка MCP серверов
-   - Популярные MCP серверы
-   - Создание собственных MCP серверов
-   - Enterprise MCP конфигурация
+   - Конфигурация MCP серверов (settings.json)
+   - OAuth-аутентификация
+   - Официальные MCP серверы (GitHub, Filesystem, Database)
+   - Создание кастомных MCP серверов
+   - Enterprise security (allowlists)
+   - Примеры использования и best practices
 
 8. **[Skills и Agents](./08-skills-and-agents.md)**
-   - Что такое Agent Skills
-   - Создание Skills
-   - Организация Skills
-   - Примеры Skills
+   - Что такое Skills и Agents
+   - Структура agent definitions
+   - Официальные агенты (Code Reviewer, Silent Failure Hunter, и др.)
+   - Создание кастомных агентов
+   - Agent vs Subagent vs Skill
+   - Integration с plugins
+   - Примеры и best practices
 
 9. **[Plugins и Marketplaces](./09-plugins-and-marketplaces.md)**
-   - Что такое plugins
-   - Установка plugins
-   - Создание собственных plugins
-   - Plugin marketplaces
-   - Распространение plugins
+   - Что такое Claude Code Plugins
+   - Официальные plugins (PR Review Toolkit, Feature Dev, Code Review)
+   - Установка и управление plugins
+   - Структура и создание собственных plugins
+   - Marketplaces (официальный, community, enterprise, приватные)
+   - Best practices и troubleshooting
 
 ### Конфигурация
 
 10. **[Settings и Configuration](./10-settings-and-configuration.md)**
-    - Система настроек
-    - Settings файлы (JSON)
-    - Memory файлы (CLAUDE.md)
+    - Файл settings.json (расположение и структура)
+    - Permissions (allowedTools, deniedTools, permissionMode)
+    - Sandbox mode конфигурация
+    - Hooks configuration
+    - Status Line и MCP servers settings
     - Environment variables
-    - Settings precedence
-    - Enterprise managed settings
+    - Профили конфигурации
+    - Best practices
 
 11. **[GitHub Integration](./11-github-integration.md)**
-    - Claude Code GitHub Actions
-    - Настройка GitHub App
-    - Workflow automation
-    - PR и Issue интеграция
-    - Best practices для CI/CD
+    - Встроенная Git интеграция
+    - GitHub CLI (gh) использование
+    - Commit Commands Plugin (/commit, /commit-push, /commit-push-pr)
+    - Code Review Plugin (автоматический PR review)
+    - GitHub MCP Server с OAuth
+    - Claude Code Action для GitHub
+    - PR Review Toolkit (6 специализированных агентов)
+    - Best practices и troubleshooting
 
 ### Безопасность и Troubleshooting
 
 12. **[Security и Permissions](./12-security-and-permissions.md)**
-    - Permission-based архитектура
-    - Configuring permissions
-    - Tool-specific permission rules
-    - Hooks для контроля доступа
-    - Sandboxing
-    - Best practices безопасности
+    - Система permissions (allowedTools, deniedTools)
+    - Sandbox mode (изоляция команд)
+    - permissionMode (acceptEdits, manual, strict)
+    - Best practices (Principle of Least Privilege)
+    - Hooks для security валидации
+    - Enterprise security (централизованные политики)
+    - Compliance reporting
+    - Security checklist
 
 13. **[Troubleshooting и Debugging](./13-troubleshooting-and-debugging.md)**
-    - Частые проблемы установки
-    - Проблемы с аутентификацией
-    - Performance issues
-    - IDE integration problems
-    - Debug mode и логирование
+    - Debug mode и просмотр логов
+    - Doctor command для диагностики
+    - 10+ распространенных проблем и их решений
+    - Debug workflow (систематический подход)
+    - Reporting bugs (/bug команда, GitHub issues)
+    - Performance issues и их решение
+    - Best practices для debugging
 
 ## Быстрые ссылки
 

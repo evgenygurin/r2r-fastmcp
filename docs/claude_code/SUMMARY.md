@@ -114,76 +114,86 @@
 ✅ Security best practices  
 ✅ Advanced workflows  
 
-## Дополнительные разделы (рекомендуется создать)
+## Дополнительные разделы (созданы)
 
-Следующие разделы упомянуты в индексе но не созданы в деталях:
-
-### 6. Субагенты (06-subagents.md)
-- Концепция субагентов
-- Создание специализированных агентов
+### 6. Субагенты (06-subagents.md) ✅
+- Концепция субагентов и их типы
+- Explore, Plan, Code Explorer, Code Architect
+- Code Reviewer, Silent Failure Hunter
+- Параллельное выполнение
+- Создание кастомных агентов
 - Best practices
 
-### 7. MCP Integration (07-mcp-integration.md)
+### 7. MCP Integration (07-mcp-integration.md) ✅
 - Model Context Protocol подробно
-- Установка и настройка MCP серверов
-- Популярные серверы (Postgres, GitHub, Slack, Figma и т.д.)
+- Конфигурация и OAuth-аутентификация
+- Официальные MCP серверы (GitHub, Filesystem, Database)
 - Создание собственных MCP серверов
-- Enterprise configuration
+- Enterprise security и allowlists
+- Примеры использования
 
-### 8. Skills и Agents (08-skills-and-agents.md)
-- Что такое Agent Skills
-- Создание и организация Skills
-- Model-invoked vs User-invoked
-- Примеры Skills
-- Plugin Skills
+### 8. Skills и Agents (08-skills-and-agents.md) ✅
+- Что такое Skills и Agents
+- Структура agent definitions
+- Официальные агенты (Code Reviewer, Silent Failure Hunter, etc.)
+- Создание кастомных агентов
+- Agent vs Subagent vs Skill
+- Integration с plugins
 
-### 9. Plugins и Marketplaces (09-plugins-and-marketplaces.md)
-- Архитектура plugins
-- Создание plugins
-- Plugin marketplaces
-- Распространение и sharing
-- Validation и testing
+### 9. Plugins и Marketplaces (09-plugins-and-marketplaces.md) ✅
+- Система плагинов Claude Code
+- Официальные plugins (PR Review Toolkit, Feature Dev, Code Review)
+- Структура и создание plugins
+- Marketplaces (официальный, community, enterprise)
+- Приватные marketplaces с аутентификацией
+- Best practices и troubleshooting
 
-### 10. Settings и Configuration (10-settings-and-configuration.md)
-- Система настроек
-- Settings precedence
-- Memory files (CLAUDE.md)
+### 10. Settings и Configuration (10-settings-and-configuration.md) ✅
+- Файл settings.json (структура и расположение)
+- Permissions (allowedTools, deniedTools, permissionMode)
+- Sandbox mode конфигурация
+- Hooks configuration
+- Status Line и MCP servers
 - Environment variables
-- Enterprise managed settings
-- Tool permissions
+- Профили конфигурации
 
-### 11. GitHub Integration (11-github-integration.md)
-- Claude Code GitHub Actions
-- Quick setup
-- Workflow automation
-- PR и Issue интеграция
-- AWS Bedrock / Google Vertex setup
-- Best practices
+### 11. GitHub Integration (11-github-integration.md) ✅
+- Встроенная Git интеграция
+- GitHub CLI (gh) использование
+- Commit Commands Plugin (/commit, /commit-push, /commit-push-pr)
+- Code Review Plugin (автоматический PR review)
+- GitHub MCP Server с OAuth
+- Claude Code Action для GitHub
+- PR Review Toolkit (6 агентов)
+- Best practices и troubleshooting
 
-### 12. Security и Permissions (12-security-and-permissions.md)
-- Permission-based архитектура
-- IAM система
-- Tool-specific permissions
-- Hooks для security
-- Sandboxing
-- Best practices
+### 12. Security и Permissions (12-security-and-permissions.md) ✅
+- Система permissions (allowedTools, deniedTools)
+- Sandbox mode (изоляция команд)
+- permissionMode (acceptEdits, manual, strict)
+- Best practices (Principle of Least Privilege)
+- Hooks для security валидации
+- Enterprise security (централизованные политики)
+- Compliance reporting
+- Security checklist
 
-### 13. Troubleshooting (13-troubleshooting-and-debugging.md)
-- Частые проблемы установки
-- Проблемы аутентификации
-- WSL issues
-- IDE integration
-- Performance
-- Debug mode
+### 13. Troubleshooting и Debugging (13-troubleshooting-and-debugging.md) ✅
+- Debug mode и просмотр логов
+- Doctor command для диагностики
+- 10+ распространенных проблем и решений
+- Debug workflow (систематический подход)
+- Reporting bugs (/bug команда, GitHub issues)
+- Performance issues
+- Best practices для debugging
 
 ## Статистика
 
-- **Всего файлов:** 6
-- **Общий объем:** ~50,000+ слов
-- **Примеров кода:** 100+
-- **Практических примеров:** 50+
-- **Best practices:** 30+
-- **Ссылок на официальную документацию:** 20+
+- **Всего файлов:** 14 (README + 13 разделов)
+- **Общий объем:** ~150,000+ слов
+- **Примеров кода:** 300+
+- **Практических примеров:** 150+
+- **Best practices:** 80+
+- **Ссылок на официальную документацию:** 60+
 
 ## Особенности документации
 
