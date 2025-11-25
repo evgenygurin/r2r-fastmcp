@@ -78,8 +78,9 @@ r2r_agent() {
         # Extract conversation_id for follow-up
         local new_conv_id=$(echo "$response" | jq -r '.results.conversation_id // empty')
         if [ -n "$new_conv_id" ] && [ -z "$conversation_id" ]; then
-            print_info "Conversation ID: $new_conv_id"
-            echo ""
+            # Output conversation_id to stderr without colors for easy copying
+            echo "Conversation ID: $new_conv_id" >&2
+            echo "" >&2
         fi
 
         # Extract and display the agent's response
