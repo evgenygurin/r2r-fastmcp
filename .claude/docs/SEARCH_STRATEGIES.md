@@ -14,9 +14,10 @@
 
 ### Симптомы
 
-При использовании `rag_fusion` или `hyde` стратегий RAG запросы возвращают:
-- `null` в стандартном выводе
-- Ошибка 500 в JSON ответе
+При использовании `rag_fusion` или `hyde` стратегий как в `search`, так и в `rag` командах:
+- **Search команда**: возвращает пустые результаты
+- **RAG команда**: возвращает JSON с ошибкой вместо generated_answer
+- Ошибка 500 в JSON ответе для обеих команд
 
 ### Полная ошибка
 
@@ -39,7 +40,13 @@ R2R сервер пытается использовать VertexAI/Gemini мо�
 
 ### Workaround
 
-В `.claude/scripts/r2r_client.sh` используется `DEFAULT_SEARCH_STRATEGY="vanilla"` вместо продвинутых стратегий.
+В `.claude/scripts/lib/common.sh` используется `DEFAULT_SEARCH_STRATEGY="vanilla"` вместо продвинутых стратегий.
+
+Это влияет на:
+- `.claude/scripts/commands/search.sh` - hybrid search
+- `.claude/scripts/commands/rag.sh` - RAG generation
+
+Обе команды поддерживают явное указание стратегии через `--strategy <name>`, но рекомендуется использовать только `vanilla`.
 
 ## Тестирование стратегий
 
@@ -82,7 +89,7 @@ curl -s -X POST "https://api.136-119-36-216.nip.io/v3/retrieval/rag" \
 2. **Hybrid search (`use_hybrid_search: true`) всё ещё работает** с vanilla стратегией
 3. **Обратиться к администратору R2R сервера** для исправления конфигурации VertexAI
 
-## Конфигурация r2r_client.sh
+## Конфигурация lib/common.sh
 
 ```bash
 # Default settings
@@ -90,6 +97,25 @@ DEFAULT_LIMIT=3
 DEFAULT_MAX_TOKENS=4000
 DEFAULT_MODE="research"
 DEFAULT_SEARCH_STRATEGY="vanilla"  # vanilla работает, rag_fusion и hyde - нет
+```
+
+## Примеры использования модульных команд
+
+### Тестирование стратегий через CLI
+
+```bash
+# Search с разными стратегиями
+.claude/scripts/r2r search "R2R" 3 --strategy vanilla      # ✅ Работает
+.claude/scripts/r2r search "R2R" 3 --strategy rag_fusion   # ❌ Пустые результаты
+.claude/scripts/r2r search "R2R" 3 --strategy hyde         # ❌ Пустые результаты
+
+# RAG с разными стратегиями
+.claude/scripts/r2r rag "What is R2R?" --strategy vanilla      # ✅ Работает
+.claude/scripts/r2r rag "What is R2R?" --strategy rag_fusion   # ❌ VertexAI Error
+.claude/scripts/r2r rag "What is R2R?" --strategy hyde         # ❌ VertexAI Error
+
+# Проверка с JSON output
+.claude/scripts/r2r rag "test" --strategy rag_fusion --json | jq '.detail.error'
 ```
 
 ## История изменений
