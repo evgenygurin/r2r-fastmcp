@@ -11,79 +11,52 @@ SEARCH_STRATEGY="vanilla"
 USE_GRAPH_SEARCH=false
 COLLECTION_ID=""
 
-parse_search_flags() {
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            --filter)
-                if [[ "$2" =~ ^([^=]+)=(.+)$ ]]; then
-                    FILTER_FIELD="${BASH_REMATCH[1]}"
-                    FILTER_VALUE="${BASH_REMATCH[2]}"
-                    shift 2
-                else
-                    echo "Error: --filter requires format 'field=value'" >&2
-                    exit 1
-                fi
-                ;;
-            --strategy)
-                SEARCH_STRATEGY="$2"
-                shift 2
-                ;;
-            --graph)
-                USE_GRAPH_SEARCH=true
-                shift
-                ;;
-            --collection)
-                COLLECTION_ID="$2"
-                shift 2
-                ;;
-            --json)
-                JSON_OUTPUT=true
-                shift
-                ;;
-            --verbose)
-                VERBOSE=true
-                shift
-                ;;
-            *)
-                break
-                ;;
-        esac
-    done
-}
-
 r2r_search() {
     local query="$1"
     local limit="${2:-$DEFAULT_LIMIT}"
 
-    # Build search settings JSON
-    local search_settings="{\"use_hybrid_search\":true"
+    # Build filters using jq
+    local filters=$(jq -n '{}')
 
-    # Add strategy
-    search_settings="${search_settings},\"search_strategy\":\"${SEARCH_STRATEGY}\""
-
-    # Add graph search
-    if [ "$USE_GRAPH_SEARCH" = true ]; then
-        search_settings="${search_settings},\"use_graph_search\":true"
-    fi
-
-    # Add filters
-    local filters="{}"
     if [ -n "$FILTER_FIELD" ] && [ -n "$FILTER_VALUE" ]; then
-        filters="{\"${FILTER_FIELD}\":{\"\$eq\":\"${FILTER_VALUE}\"}}"
+        filters=$(echo "$filters" | jq \
+            --arg field "$FILTER_FIELD" \
+            --arg value "$FILTER_VALUE" \
+            '. + {($field): {"$eq": $value}}')
     fi
+
     if [ -n "$COLLECTION_ID" ]; then
-        if [ "$filters" = "{}" ]; then
-            filters="{\"collection_ids\":{\"\$overlap\":[\"${COLLECTION_ID}\"]}}"
-        else
-            filters="${filters:0:-1},\"collection_ids\":{\"\$overlap\":[\"${COLLECTION_ID}\"]}}"
-        fi
+        filters=$(echo "$filters" | jq \
+            --arg cid "$COLLECTION_ID" \
+            '. + {"collection_ids": {"$overlap": [$cid]}}')
     fi
-    search_settings="${search_settings},\"filters\":${filters}}"
+
+    # Build search settings using jq
+    # Convert bash boolean to JSON boolean
+    local use_graph_json="false"
+    [ "$USE_GRAPH_SEARCH" = true ] && use_graph_json="true"
+
+    local search_settings=$(jq -n \
+        --arg strategy "$SEARCH_STRATEGY" \
+        --argjson use_graph "$use_graph_json" \
+        --argjson filters "$filters" \
+        '{
+            use_hybrid_search: true,
+            search_strategy: $strategy,
+            filters: $filters
+        } + (if $use_graph then {use_graph_search: true} else {} end)')
+
+    # Build complete payload using jq
+    local payload=$(jq -n \
+        --arg q "$query" \
+        --argjson lim "$limit" \
+        --argjson settings "$search_settings" \
+        '{query: $q, limit: $lim, search_settings: $settings}')
 
     local response=$(curl -s -X POST "${R2R_BASE_URL}/v3/retrieval/search" \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer ${API_KEY}" \
-        -d "{\"query\":\"${query}\",\"limit\":${limit},\"search_settings\":${search_settings}}")
+        -d "$payload")
 
     if [ "$JSON_OUTPUT" = true ]; then
         echo "$response" | jq '.'
@@ -152,12 +125,56 @@ EOF
 
 # If executed directly
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-    parse_search_flags "$@"
+    # Parse flags first, they modify global variables
+    ARGS=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --filter)
+                if [[ "$2" =~ ^([^=]+)=(.+)$ ]]; then
+                    FILTER_FIELD="${BASH_REMATCH[1]}"
+                    FILTER_VALUE="${BASH_REMATCH[2]}"
+                    shift 2
+                else
+                    echo "Error: --filter requires format 'field=value'" >&2
+                    exit 1
+                fi
+                ;;
+            --strategy)
+                SEARCH_STRATEGY="$2"
+                shift 2
+                ;;
+            --graph)
+                USE_GRAPH_SEARCH=true
+                shift
+                ;;
+            --collection)
+                COLLECTION_ID="$2"
+                shift 2
+                ;;
+            --json)
+                JSON_OUTPUT=true
+                shift
+                ;;
+            --verbose)
+                VERBOSE=true
+                shift
+                ;;
+            help|--help|-h)
+                show_help
+                exit 0
+                ;;
+            *)
+                ARGS+=("$1")
+                shift
+                ;;
+        esac
+    done
 
-    if [ $# -lt 1 ] || [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    # Check if we have positional arguments
+    if [ ${#ARGS[@]} -lt 1 ]; then
         show_help
         exit 0
     fi
 
-    r2r_search "$@"
+    r2r_search "${ARGS[@]}"
 fi
