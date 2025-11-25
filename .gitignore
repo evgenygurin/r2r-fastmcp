@@ -4,11 +4,14 @@
 .LSOverride
 ._*
 
-# Claude Code directory (ignore temporary files, keep commands and settings)
+# Claude Code directory (ignore temporary files, keep structure)
 .claude/*.log
 .claude/*.tmp
 .claude/cache/
 .claude/sessions/
+.claude/mcp-servers/**/.env
+.claude/mcp-servers/**/__pycache__/
+.claude/mcp-servers/**/*.pyc
 
 # IDEs
 .vscode/
