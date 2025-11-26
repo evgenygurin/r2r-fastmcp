@@ -9,15 +9,20 @@
 ├── r2r                    # Главный CLI dispatcher
 ├── lib/
 │   └── common.sh          # Общие функции и переменные
-└── commands/              # Модульные команды
-    ├── search.sh          # Hybrid search с фильтрами
-    ├── rag.sh             # RAG retrieval + generation
-    ├── agent.sh           # Multi-turn agent
-    ├── docs.sh            # Document management (14 команд)
-    ├── collections.sh     # Collection management (6 команд)
-    ├── conversation.sh    # Conversation management (5 команд)
-    ├── graph.sh           # Knowledge graph ops (20 команд)
-    └── analytics.sh       # System analytics (3 команды)
+├── commands/              # Модульные команды (8 команд, 48 подкоманд)
+│   ├── search.sh          # Hybrid search с фильтрами
+│   ├── rag.sh             # RAG retrieval + generation
+│   ├── agent.sh           # Multi-turn agent
+│   ├── docs.sh            # Document management (14 команд)
+│   ├── collections.sh     # Collection management (6 команд)
+│   ├── conversation.sh    # Conversation management (5 команд)
+│   ├── graph.sh           # Knowledge graph ops (20 команд)
+│   └── analytics.sh       # System analytics (3 команды)
+└── helpers/               # Helper scripts (4 скрипта)
+    ├── examples.sh        # Interactive examples (50+ примеров)
+    ├── workflows.sh       # Automated workflows (5 workflows)
+    ├── quick.sh           # Quick tasks (10 tasks)
+    └── aliases.sh         # Shell aliases and functions
 ```
 
 ## 🚀 Быстрый старт
@@ -391,6 +396,135 @@ DEFAULT_SEARCH_STRATEGY="vanilla"  # Search strategy
 5. **Quiet mode** - Для скриптов и пайпов (`-q`)
 6. **JSON mode** - Для автоматизации (`--json`)
 7. **Multi-turn conversations** - Сохранение контекста через conversation_id
+
+---
+
+## 🛠️ Helper Scripts
+
+Дополнительные скрипты для упрощения работы с R2R CLI.
+
+### `examples.sh` - Interactive Examples
+
+Интерактивные демонстрации с пошаговыми примерами:
+
+```bash
+# Show all examples
+./examples.sh
+
+# Specific category
+./examples.sh search      # Search examples
+./examples.sh rag         # RAG examples
+./examples.sh agent       # Agent examples
+./examples.sh workflows   # Complete workflows
+```
+
+**Features:**
+- 50+ готовых примеров
+- Интерактивное выполнение (выбираешь что запустить)
+- Пояснения для каждого примера
+- Практические workflows
+
+### `workflows.sh` - Automated Workflows
+
+Многошаговые автоматизированные процессы:
+
+```bash
+# Upload document with auto-extract
+./workflows.sh upload paper.pdf [collection_id]
+
+# Create collection and populate
+./workflows.sh create-collection "Research" "AI papers" *.pdf
+
+# Interactive research session
+./workflows.sh research "What is RAG?"
+
+# Analyze document
+./workflows.sh analyze <document_id>
+
+# Batch upload directory
+./workflows.sh batch-upload ./docs [collection_id] "*.pdf"
+```
+
+**Workflows:**
+- **upload** - Upload + extract + verify
+- **create-collection** - Create + populate + build graph
+- **research** - Multi-turn interactive session
+- **analyze** - Comprehensive document analysis
+- **batch-upload** - Mass upload with progress
+
+### `quick.sh` - Quick Tasks
+
+Одностроковые shortcuts для частых операций:
+
+```bash
+# Quick search + RAG answer
+./quick.sh ask "What is RAG?"
+
+# Show R2R status
+./quick.sh status
+
+# Quick upload with auto-extract
+./quick.sh up paper.pdf [collection_id]
+
+# Create collection
+./quick.sh col "Research Papers" "AI research"
+
+# Search in last collection
+./quick.sh col-search "transformers"
+
+# Continue last conversation
+./quick.sh continue "Tell me more"
+
+# Graph overview
+./quick.sh graph <collection_id>
+
+# Batch upload current directory
+./quick.sh batch "*.pdf"
+
+# Find documents by title
+./quick.sh find "machine learning"
+
+# Delete failed documents
+./quick.sh cleanup
+```
+
+**Tasks:** ask, status, up, col, col-search, continue, graph, batch, find, cleanup
+
+### `aliases.sh` - Shell Aliases
+
+Shortcuts для bash/zsh:
+
+```bash
+# Source в shell
+source .claude/scripts/aliases.sh
+
+# Core aliases
+rs "query"              # r2r search
+rr "question"           # r2r rag
+ra "message"            # r2r agent
+rd                      # r2r docs
+rc                      # r2r collections
+rg                      # r2r graph
+
+# Quick tasks
+rq ask "query"          # quick.sh ask
+rq up file.pdf          # quick.sh up
+rq status               # quick.sh status
+
+# Helper functions
+r2r-ask "query"         # Search + RAG
+r2r-up file.pdf         # Upload + extract
+r2r-cont "message"      # Continue conversation
+r2r-col "Name"          # Create collection
+r2r-batch "*.pdf"       # Batch upload
+```
+
+**Installation:**
+```bash
+# Add to .bashrc or .zshrc
+echo 'source /path/to/.claude/scripts/aliases.sh' >> ~/.bashrc
+source ~/.bashrc
+```
 
 ---
 
