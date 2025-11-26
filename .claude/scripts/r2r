@@ -22,6 +22,7 @@ CORE COMMANDS:
 MANAGEMENT COMMANDS:
     docs <action> [args]                Document management (list, get, upload, delete)
     collections <action> [args]         Collection management (list, create, add-doc)
+    conversation <action> [args]        Conversation management (create, list, get, delete)
     graph <action> [args]               Knowledge graph operations (entities, relationships)
     analytics <action> [args]           Analytics (collection, document, system)
 
@@ -83,6 +84,11 @@ case "$COMMAND" in
     collections|coll)
         shift
         "${SCRIPT_DIR}/commands/collections.sh" "$@"
+        ;;
+
+    conversation|conv)
+        shift
+        "${SCRIPT_DIR}/commands/conversation.sh" "$@"
         ;;
 
     graph|kg)
