@@ -40,16 +40,43 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
+            **TASK 1: Perform Code Review**
+
+            Review this pull request and identify:
+            - Code quality and best practices violations
             - Potential bugs or issues
             - Performance considerations
             - Security concerns
-            - Test coverage
+            - Missing test coverage
+            - Documentation issues
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            Use the repository's CLAUDE.md for guidance on style and conventions.
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            **TASK 2: Auto-fix with @codegen**
+
+            After completing your review, if you found ANY issues that can be automatically fixed:
+
+            1. Create a detailed comment using `gh pr comment` that:
+               - Summarizes the review findings
+               - Mentions @codegen at the start
+               - Provides specific, actionable instructions for fixes
+
+            2. Your comment MUST follow this format:
+               ```
+               @codegen исправь следующие проблемы:
+
+               1. [Specific issue #1 with file:line reference]
+                  - Что нужно сделать: [exact instructions]
+
+               2. [Specific issue #2 with file:line reference]
+                  - Что нужно сделать: [exact instructions]
+
+               Используй руководство из CLAUDE.md для стиля кода.
+               ```
+
+            3. If NO issues found, just leave a positive review comment WITHOUT mentioning @codegen.
+
+            Be specific with file paths and line numbers so @codegen knows exactly what to fix.
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
