@@ -305,7 +305,7 @@ Claude Code поддерживает работу в контейнерах ра
 - name: Run Claude Code
   run: claude "Generate unit tests for all functions in src/"
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 ```
 
 См. [GitHub Actions документацию](./11-github-integration.md) для подробностей.
