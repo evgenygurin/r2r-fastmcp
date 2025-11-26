@@ -9,6 +9,11 @@ on:
       - 'CLAUDE.md'
       - 'README.md'
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   review-docs:
     name: Review Documentation Changes
@@ -58,11 +63,33 @@ jobs:
           api_key = os.environ.get('GEMINI_API_KEY')
           if not api_key:
               print("❌ GEMINI_API_KEY secret not configured")
+              print("📝 Please add a valid Google AI Studio API key as a repository secret")
+              print("🔗 Get your API key at: https://aistudio.google.com/app/apikey")
               sys.exit(1)
           
           # Configure Gemini API (AI Studio, not Vertex AI)
-          genai.configure(api_key=api_key)
-          model = genai.GenerativeModel('gemini-1.5-flash')
+          try:
+              genai.configure(api_key=api_key)
+              model = genai.GenerativeModel('gemini-1.5-flash')
+              
+              # Test the configuration with a minimal call
+              print("🔧 Testing Gemini API connection...")
+              test_response = model.generate_content("Hello")
+              print("✅ Gemini API connection successful")
+              
+          except Exception as e:
+              error_msg = str(e)
+              print(f"❌ Failed to configure Gemini API: {error_msg}")
+              
+              if "API keys are not supported" in error_msg:
+                  print("💡 The API key appears to be for Vertex AI, not AI Studio")
+                  print("📝 Please use a Google AI Studio API key instead")
+                  print("🔗 Get your API key at: https://aistudio.google.com/app/apikey")
+              elif "CREDENTIALS_MISSING" in error_msg:
+                  print("💡 Authentication credentials are missing or invalid")
+                  print("📝 Please check your GEMINI_API_KEY secret configuration")
+              
+              sys.exit(1)
           
           # Read project context from CLAUDE.md
           project_context = ""
@@ -147,11 +174,19 @@ jobs:
                   
                   prompt = "\n".join(prompt_lines)
                   
-                  response = model.generate_content(prompt)
-                  reviews.append(f"## 📄 {filepath}\n\n{response.text}\n\n---\n")
+                  try:
+                      response = model.generate_content(prompt)
+                      if response.text:
+                          reviews.append(f"## 📄 {filepath}\n\n{response.text}\n\n---\n")
+                      else:
+                          reviews.append(f"## 📄 {filepath}\n\n⚠️ **Предупреждение**: Получен пустой ответ от Gemini API\n\n---\n")
+                  except Exception as api_error:
+                      print(f"❌ API error for {filepath}: {api_error}")
+                      reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка API**: {str(api_error)}\n\n---\n")
                   
               except Exception as e:
-                  reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка**: {str(e)}\n\n---\n")
+                  print(f"❌ File processing error for {filepath}: {e}")
+                  reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка обработки файла**: {str(e)}\n\n---\n")
           
           # Write review
           with open('review_output.md', 'w', encoding='utf-8') as f:
@@ -181,15 +216,41 @@ jobs:
             const fs = require('fs');
             
             if (!fs.existsSync('review_output.md')) {
-              console.log('No review output found');
+              console.log('❌ No review output found');
               return;
             }
             
-            const review = fs.readFileSync('review_output.md', 'utf8');
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: review
-            });
+            try {
+              const review = fs.readFileSync('review_output.md', 'utf8');
+              
+              // Truncate if too long (GitHub comment limit is ~65536 chars)
+              const maxLength = 65000;
+              const finalReview = review.length > maxLength 
+                ? review.substring(0, maxLength) + '\n\n---\n\n*Обзор сокращен из-за ограничений длины комментария GitHub*'
+                : review;
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: finalReview
+              });
+              
+              console.log('✅ Review comment posted successfully');
+              
+            } catch (error) {
+              console.log('❌ Failed to post review comment:', error.message);
+              
+              // Post a fallback comment about the error
+              try {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `## 🤖 Gemini Documentation Review\n\n❌ **Ошибка**: Не удалось выполнить обзор документации.\n\n**Причина**: ${error.message}\n\n*Проверьте логи GitHub Actions для подробностей.*`
+                });
+                console.log('✅ Fallback error comment posted');
+              } catch (fallbackError) {
+                console.log('❌ Failed to post fallback comment:', fallbackError.message);
+              }
+            }
