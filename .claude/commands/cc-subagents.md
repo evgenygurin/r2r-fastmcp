@@ -2,12 +2,12 @@
 name: cc-subagents
 description: Claude Code subagents and parallel execution
 allowed-tools: Read
-denied-tools: Write, Edit, Bash
+denied-tools: Bash, Write, Edit
 ---
 
 # Subagents Guide
 
-Read and explain subagents documentation from `docs/claude_code/06-subagents.md`.
+Comprehensive subagents documentation at @docs/claude_code/06-subagents.md
 
 ## What are Subagents?
 

@@ -50,20 +50,13 @@ r2r-fastmcp/
 │   │   ├── research-assistant.md # Research mode с reasoning
 │   │   ├── doc-analyst.md        # RAG-анализ документов
 │   │   └── knowledge-explorer.md # Exploration + knowledge graph
-│   ├── skills/                    # 3 описания возможностей R2R
-│   │   ├── r2r-search.md         # Search capabilities (307 строк)
-│   │   ├── r2r-rag.md            # RAG capabilities (400 строк)
-│   │   └── r2r-graph.md          # Graph capabilities (465 строк)
 │   ├── hooks/                     # Lifecycle hooks
 │   │   └── SessionStart/         # check-r2r.md - статус API
-│   ├── docs/                      # Документация и troubleshooting
-│   │   ├── SEARCH_STRATEGIES.md  # Troubleshooting для R2R стратегий
-│   │   └── migration/            # Архив миграции MCP → Bash
 │   ├── config/                    # Конфигурация
 │   │   └── .env                  # R2R_BASE_URL, API_KEY
-│   ├── settings.json              # Пустой (hooks удалены после миграции)
-│   └── README.md                  # Структура и quick start для .claude/
+│   └── settings.json              # Пустой (hooks удалены после миграции)
 ├── README.md                      # Главная страница проекта
+└── .claude/SEARCH_STRATEGIES.md   # Troubleshooting для R2R стратегий
 ```
 
 ## 🔧 Основные команды
@@ -186,16 +179,6 @@ du -sh docs/r2r docs/fastmcp docs/claude_code
 - Монолитные r2r_client.sh и r2r_advanced.sh заменены модульной структурой commands/
 - **Используется jq для формирования JSON** - избегает проблем с экранированием и валидностью
 
-### Skills - описательная документация возможностей
-
-Директория `.claude/skills/` содержит подробные описания R2R capabilities:
-
-- **r2r-search.md** (307 строк) - Search strategies, filter types, query optimization
-- **r2r-rag.md** (400 строк) - Generation modes, temperature guidelines, citation formats
-- **r2r-graph.md** (465 строк) - Entity types, relationship discovery, community analysis
-
-**Назначение:** Универсальные описания API возможностей, не зависят от реализации (CLI/MCP/direct API). Используются для понимания полного спектра функциональности R2R системы.
-
 ### R2R API Defaults
 
 Конфигурация в `lib/common.sh`:
@@ -206,7 +189,7 @@ DEFAULT_MODE="research"            # Agent mode (research/rag)
 DEFAULT_SEARCH_STRATEGY="vanilla"  # ⚠️ ТОЛЬКО vanilla работает
 ```
 
-**⚠️ Известная проблема:** Search strategies `hyde` и `rag_fusion` не работают из-за ошибки конфигурации VertexAI на R2R сервере. См. `.claude/docs/SEARCH_STRATEGIES.md` для деталей.
+**⚠️ Известная проблема:** Search strategies `hyde` и `rag_fusion` не работают из-за ошибки конфигурации VertexAI на R2R сервере. См. `.claude/SEARCH_STRATEGIES.md` для деталей.
 
 ## 🚫 Запрещенные действия
 
@@ -354,7 +337,7 @@ fd -e md authentication docs/
 **Проблема:** RAG запрос возвращает `null`
 
 **Решение:**
-1. Проверь `.claude/docs/SEARCH_STRATEGIES.md`
+1. Проверь `.claude/SEARCH_STRATEGIES.md`
 2. Убедись что `DEFAULT_SEARCH_STRATEGY="vanilla"`
 3. Проверь `.claude/config/.env` на наличие `API_KEY`
 
@@ -391,7 +374,6 @@ fd -e md . docs/r2r/ | sort
 ## 📚 Ссылки на важные файлы
 
 ### Конфигурация R2R
-- `.claude/README.md` - структура и quick start для .claude/
 - `.claude/config/.env` - API credentials
 - `.claude/scripts/r2r` - main CLI dispatcher
 - `.claude/scripts/lib/common.sh` - shared configuration
@@ -400,8 +382,6 @@ fd -e md . docs/r2r/ | sort
   - collections.sh, conversation.sh, graph.sh, analytics.sh
 - `.claude/scripts/` - 4 helper scripts:
   - examples.sh, workflows.sh, quick.sh, aliases.sh
-- `.claude/skills/` - 3 описания возможностей R2R:
-  - r2r-search.md (307 строк), r2r-rag.md (400 строк), r2r-graph.md (465 строк)
 - `.claude/docs/SEARCH_STRATEGIES.md` - troubleshooting
 
 ### Документация навигация
