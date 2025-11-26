@@ -63,7 +63,9 @@ jobs:
 
             CRITICAL: Combine ALL fixable issues (your findings + other bots' suggestions) and you MUST:
 
-            1. Use `gh pr comment` command to post a comment to the PR
+            1. Use EXACTLY this command format: `gh pr comment $PR_NUMBER --body "..."`
+               DO NOT use `gh pr review` - it's not in allowed-tools!
+               ONLY use `gh pr comment`!
 
             2. The comment MUST start with @codegen and provide SPECIFIC, ACTIONABLE instructions
 
