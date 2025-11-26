@@ -31,6 +31,26 @@ jobs:
         with:
           fetch-depth: 1
 
+      # Cache bun dependencies
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      # Cache Claude Code installation
+      - name: Cache Claude Code
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/claude
+          key: ${{ runner.os }}-claude-code-2.0.50
+          restore-keys: |
+            ${{ runner.os }}-claude-code-
+
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
