@@ -36,6 +36,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
@@ -52,31 +53,43 @@ jobs:
 
             Use the repository's CLAUDE.md for guidance on style and conventions.
 
-            **TASK 2: Auto-fix with @codegen**
+            **TASK 2: Trigger @codegen for Auto-fix**
 
-            After completing your review, if you found ANY issues that can be automatically fixed:
+            CRITICAL: If you found ANY issues that can be automatically fixed, you MUST:
 
-            1. Create a detailed comment using `gh pr comment` that:
-               - Summarizes the review findings
-               - Mentions @codegen at the start
-               - Provides specific, actionable instructions for fixes
+            1. Use `gh pr comment` command to post a comment to the PR
 
-            2. Your comment MUST follow this format:
+            2. The comment MUST start with @codegen and provide SPECIFIC, ACTIONABLE instructions
+
+            3. Follow this EXACT format:
                ```
-               @codegen исправь следующие проблемы:
+               @codegen fix the following issues:
 
-               1. [Specific issue #1 with file:line reference]
-                  - Что нужно сделать: [exact instructions]
+               1. [file.name:line] - [specific problem]
+                  Action required: [exact fix instructions]
 
-               2. [Specific issue #2 with file:line reference]
-                  - Что нужно сделать: [exact instructions]
+               2. [file.name:line] - [specific problem]
+                  Action required: [exact fix instructions]
 
-               Используй руководство из CLAUDE.md для стиля кода.
+               Follow CLAUDE.md style guidelines.
                ```
 
-            3. If NO issues found, just leave a positive review comment WITHOUT mentioning @codegen.
+            4. Example command:
+               ```bash
+               gh pr comment ${{ github.event.pull_request.number }} --body "@codegen fix the following issues:
 
-            Be specific with file paths and line numbers so @codegen knows exactly what to fix.
+               1. README.md:85 - Missing space after ## heading
+                  Action required: Add space between ## and heading text
+
+               2. docs/setup.md:42 - Broken link
+                  Action required: Fix path to ./usage.md
+
+               Follow CLAUDE.md style guidelines."
+               ```
+
+            5. If NO fixable issues found, leave a positive review comment WITHOUT @codegen mention.
+
+            IMPORTANT: You MUST use the `gh pr comment` tool - do NOT just output text!
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
