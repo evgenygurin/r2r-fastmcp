@@ -65,7 +65,18 @@ jobs:
               print("❌ GEMINI_API_KEY secret not configured")
               print("📝 Please add a valid Google AI Studio API key as a repository secret")
               print("🔗 Get your API key at: https://aistudio.google.com/app/apikey")
-              sys.exit(1)
+              print("⚠️  Continuing without Gemini review...")
+              
+              # Write a fallback review file instead of exiting
+              with open('review_output.md', 'w', encoding='utf-8') as f:
+                  f.write("# 🤖 Gemini Documentation Review\n\n")
+                  f.write("⚠️  **Configuration Missing**: GEMINI_API_KEY secret not configured\n\n")
+                  f.write("**Solution**: Add a Google AI Studio API key as a repository secret named `GEMINI_API_KEY`\n")
+                  f.write("🔗 Get your API key at: https://aistudio.google.com/app/apikey\n\n")
+                  f.write("*Review skipped due to missing configuration*\n")
+              
+              print("✅ Fallback review file created")
+              sys.exit(0)
           
           # Configure Gemini API (AI Studio, not Vertex AI)
           try:
@@ -89,7 +100,19 @@ jobs:
                   print("💡 Authentication credentials are missing or invalid")
                   print("📝 Please check your GEMINI_API_KEY secret configuration")
               
-              sys.exit(1)
+              print("⚠️  Continuing without Gemini review due to API configuration issues...")
+              
+              # Write a fallback review file instead of exiting
+              with open('review_output.md', 'w', encoding='utf-8') as f:
+                  f.write("# 🤖 Gemini Documentation Review\n\n")
+                  f.write("⚠️  **API Configuration Issue**: Gemini API not available\n\n")
+                  f.write(f"**Error**: {error_msg}\n\n")
+                  f.write("**Solution**: Configure a valid Google AI Studio API key in repository secrets\n")
+                  f.write("🔗 Get your API key at: https://aistudio.google.com/app/apikey\n\n")
+                  f.write("*Review skipped due to configuration issues*\n")
+              
+              print("✅ Fallback review file created")
+              sys.exit(0)
           
           # Read project context from CLAUDE.md
           project_context = ""
