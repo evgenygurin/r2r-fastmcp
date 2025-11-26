@@ -32,8 +32,12 @@ r2r_conversation_create() {
     else
         local conv_id=$(echo "$response" | jq -r '.results.id // empty')
         if [ -n "$conv_id" ]; then
+            # Save to temp file for easy reuse
+            echo "$conv_id" > /tmp/.r2r_conversation_id
+
             echo "Conversation created: $conv_id"
             [ -n "$name" ] && echo "Name: $name"
+            echo "To reuse: CONV_ID=\$(head -1 /tmp/.r2r_conversation_id)"
         else
             echo "$response" | jq '.'
         fi
@@ -147,6 +151,10 @@ EXAMPLES:
     # Create unnamed conversation
     conversation create
 
+    # Reuse last created conversation_id (from temp file)
+    CONV_ID=\$(head -1 /tmp/.r2r_conversation_id)
+    conversation add-message \$CONV_ID system "You are an expert"
+
     # List all conversations
     conversation list
 
@@ -161,6 +169,12 @@ EXAMPLES:
 
     # Add user message
     conversation add-message abc123 user "What is R2R?"
+
+    # Complete workflow with CONV_ID
+    conversation create "My Session"
+    CONV_ID=\$(head -1 /tmp/.r2r_conversation_id)
+    conversation add-message \$CONV_ID system "Be helpful"
+    conversation add-message \$CONV_ID user "Hello"
 
     # JSON output
     conversation list --json
