@@ -15,37 +15,49 @@ USAGE:
     r2r <command> [options] <arguments>
 
 CORE COMMANDS:
-    search <query> [limit]              Search knowledge base (hybrid search)
-    rag <query> [max_tokens]            RAG query with generation
-    agent <query> [mode] [conv_id]     Agent conversation with tools
+    search <query> [options]            Hybrid search (semantic + fulltext)
+    rag <query> [options]               RAG query with generation
+    agent <query> [options]             Multi-turn agent with tools
 
 MANAGEMENT COMMANDS:
-    docs <action> [args]                Document management (list, get, upload, delete)
-    collections <action> [args]         Collection management (list, create, add-doc)
-    conversation <action> [args]        Conversation management (create, list, get, delete)
-    graph <action> [args]               Knowledge graph operations (entities, relationships)
-    analytics <action> [args]           Analytics (collection, document, system)
+    docs <action> [args]                Document management (14 commands)
+    collections <action> [args]         Collection management (6 commands)
+    conversation <action> [args]        Conversation management (5 commands)
+    graph <action> [args]               Knowledge graph operations (20 commands)
+    analytics <action> [args]           System analytics (3 commands)
 
-GLOBAL FLAGS:
-    --json                              Output raw JSON response
-    --verbose                           Show detailed metadata (search only)
-    --thinking                          Enable extended thinking (agent only)
+COMMON FLAGS (GNU-style):
+    --limit, -l <num>                   Number of results (default varies by command)
+    --quiet, -q                         Minimal output (one line)
+    --json                              Pretty-printed JSON output
+    --verbose, -v                       Full details with metadata
+
+COMMAND-SPECIFIC FLAGS:
+    Search:  --filter/-f, --strategy/-s, --graph/-g, --collection/-c
+    RAG:     --max-tokens/-t, --filter/-f, --graph/-g, --show-sources
+    Agent:   --mode/-m, --conversation/-c, --thinking, --show-tools
 
 EXAMPLES:
-    # Core - Search
-    r2r search "machine learning" 5
-    r2r search "AI" --filter document_type=pdf
-    r2r search "transformers" --graph --collection abc123
+    # Search with flags
+    r2r search "machine learning" --limit 5
+    r2r search "AI" -l 10 -q                        # short forms
+    r2r search "transformers" --filter category=tech
+    r2r search "RAG" --graph --collection abc123
 
-    # Core - RAG & Agent
-    r2r rag "Explain transformers"
-    r2r agent "What is DeepSeek R1?"
+    # RAG with options
+    r2r rag "Explain transformers" --max-tokens 8000
+    r2r rag "What is R2R?" -t 4000 --show-sources   # short forms
 
-    # Management
-    r2r docs list
-    r2r collections create "My Collection"
-    r2r graph entities abc123
-    r2r analytics collection abc123
+    # Agent modes
+    r2r agent "What is DeepSeek R1?" --mode research
+    r2r agent "Analyze this" -m research --thinking
+    r2r agent "Follow up" --conversation abc123
+
+    # Management commands
+    r2r docs list --limit 20
+    r2r collections create "My Collection" -q
+    r2r graph entities abc123 --limit 50
+    r2r analytics system
 
 For detailed help on each command:
     r2r <command> help

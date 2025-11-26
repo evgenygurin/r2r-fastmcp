@@ -1,233 +1,495 @@
-# R2R Bash Scripts
+# R2R CLI Scripts
 
-Прямой доступ к R2R API через bash скрипты вместо MCP серверов.
+Модульная система bash скриптов для взаимодействия с R2R v3 REST API.
 
-## Файлы
+## 🏗️ Архитектура
 
-### r2r_client.sh - Основные операции запросов
+```text
+.claude/scripts/
+├── r2r                    # Главный CLI dispatcher
+├── lib/
+│   └── common.sh          # Общие функции и переменные
+└── commands/              # Модульные команды
+    ├── search.sh          # Hybrid search с фильтрами
+    ├── rag.sh             # RAG retrieval + generation
+    ├── agent.sh           # Multi-turn agent
+    ├── docs.sh            # Document management (14 команд)
+    ├── collections.sh     # Collection management (6 команд)
+    ├── conversation.sh    # Conversation management (5 команд)
+    ├── graph.sh           # Knowledge graph ops (20 команд)
+    └── analytics.sh       # System analytics (3 команды)
+```
 
-**Команды:**
-- `search <query> [limit]` - Гибридный поиск (semantic + fulltext)
-- `rag <query> [max_tokens]` - RAG запрос с генерацией ответа
-- `agent <query> [mode] [conv_id] [max_tokens]` - Агент с multi-turn разговорами
+## 🚀 Быстрый старт
 
-**Флаги:**
-- `--json` - Вывод сырого JSON
-- `--verbose` - Детальные метаданные (только для search)
-- `--thinking` - Расширенное размышление (только для agent, 4096 токенов)
+### Установка
 
-**Настройки по умолчанию:**
-- Limit: 3 результата
-- Max tokens: 8000
-- Agent mode: research (reasoning, critique, python_executor)
-- Search: hybrid (semantic + fulltext)
-
-**Примеры:**
 ```bash
-# Поиск
-./r2r_client.sh search "машинное обучение" 5
-./r2r_client.sh search "трансформеры" 10 --verbose
-./r2r_client.sh search "нейронные сети" --json
+# 1. Настрой .env файл
+cat > .claude/config/.env << 'EOF'
+R2R_BASE_URL=https://api.136-119-36-216.nip.io
+API_KEY=your-api-key-here
+EOF
+
+# 2. Сделай r2r исполняемым
+chmod +x .claude/scripts/r2r
+
+# 3. Добавь в PATH (опционально)
+export PATH="$PATH:$(pwd)/.claude/scripts"
+```
+
+### Базовое использование
+
+```bash
+# Search
+r2r search "machine learning" --limit 5
+r2r search "AI" -l 10 -q                    # quiet mode
 
 # RAG
-./r2r_client.sh rag "Объясни архитектуру трансформеров"
-./r2r_client.sh rag "Что такое RAG?" 12000
-./r2r_client.sh rag "FastMCP декораторы" --json
+r2r rag "Explain transformers"
+r2r rag "What is R2R?" --show-sources
 
-# Agent - research mode (по умолчанию)
-./r2r_client.sh agent "Что такое DeepSeek R1?"
-./r2r_client.sh agent "Проанализируй концепцию RAG" research "" "" --thinking
-
-# Agent - rag mode
-./r2r_client.sh agent "Простой вопрос о документе" rag
-
-# Multi-turn conversation
-response1=$(./r2r_client.sh agent "Что такое R2R?" --json)
-conv_id=$(echo "$response1" | jq -r '.conversation_id')
-./r2r_client.sh agent "Расскажи подробнее" research "$conv_id"
+# Agent
+r2r agent "What is DeepSeek R1?"
+r2r agent "Analyze this" --mode research --thinking
 ```
 
-### r2r_advanced.sh - Расширенные операции управления
+## 📚 Команды
 
-**30+ команд для полного управления R2R:**
+### Core Commands (3)
 
-#### Document Management
+#### `search` - Hybrid Search
+Комбинирует semantic и fulltext поиск.
+
 ```bash
-./r2r_advanced.sh docs list                    # Список документов
-./r2r_advanced.sh docs get <doc_id>            # Получить документ
-./r2r_advanced.sh docs delete <doc_id>         # Удалить документ
-./r2r_advanced.sh docs export                  # Экспорт в CSV
-./r2r_advanced.sh docs upload <file> [cols] [meta]  # Загрузить
-./r2r_advanced.sh docs extract <doc_id>        # Извлечь граф знаний
+# Basic usage
+r2r search "query" --limit 5
+
+# With filters
+r2r search "ML papers" --filter category=research
+
+# With graph search
+r2r search "entities" --graph --collection abc123
+
+# Quiet mode (one line per result)
+r2r search "quick query" -l 3 -q
 ```
 
-#### Collections
+**Флаги:**
+- `--limit, -l <num>` - Number of results (default: 3)
+- `--filter, -f <field=value>` - Filter results
+- `--strategy, -s <name>` - vanilla|rag_fusion|hyde (default: vanilla)
+- `--graph, -g` - Enable graph search
+- `--collection, -c <id>` - Search in specific collection
+- `--quiet, -q` - Minimal output
+- `--json` - Raw JSON output
+
+---
+
+#### `rag` - RAG Query with Generation
+Retrieval + LLM generation.
+
 ```bash
-./r2r_advanced.sh collections list
-./r2r_advanced.sh collections create "Name" "Description"
-./r2r_advanced.sh collections add-document <col_id> <doc_id>
-./r2r_advanced.sh collections add-user <user_id> <col_id>
+# Basic usage
+r2r rag "Explain transformers"
+
+# With options
+r2r rag "Question" --max-tokens 8000 --show-sources
+
+# Quiet mode
+r2r rag "Question" -t 4000 -q
 ```
 
-#### Knowledge Graphs
+**Флаги:**
+- `--max-tokens, -t <num>` - Max tokens (default: 4000)
+- `--filter, -f <field=value>` - Filter search
+- `--graph, -g` - Enable graph search
+- `--collection, -c <id>` - Search in collection
+- `--show-sources` - Show retrieved chunks
+- `--show-metadata` - Show metadata
+- `--quiet, -q` - Minimal output
+- `--json` - Raw JSON
+
+---
+
+#### `agent` - Multi-turn Agent
+Conversational agent with tools.
+
 ```bash
-./r2r_advanced.sh graph entities <collection_id>
-./r2r_advanced.sh graph relationships <collection_id>
-./r2r_advanced.sh graph communities <collection_id>
-./r2r_advanced.sh graph build-communities <collection_id>
-./r2r_advanced.sh graph pull <collection_id>
-./r2r_advanced.sh graph create-entity <col_id> "Name" "Desc" "Category"
-./r2r_advanced.sh graph create-relationship <col_id> "Subj" <subj_id> "Pred" "Obj" <obj_id>
+# Single query
+r2r agent "What is R2R?"
+
+# Research mode with thinking
+r2r agent "Analyze DeepSeek R1" --mode research --thinking
+
+# Continue conversation
+r2r agent "Tell me more" --conversation abc123
+
+# Quiet mode
+r2r agent "Quick question" -m rag -q
 ```
 
-#### Advanced Search
+**Флаги:**
+- `--mode, -m <mode>` - research|rag (default: research)
+- `--conversation, -c <id>` - Continue conversation
+- `--thinking` - Extended thinking (4096 tokens)
+- `--show-tools` - Show tool calls
+- `--show-sources` - Show citations
+- `--quiet, -q` - Minimal output
+- `--json` - Raw JSON
+
+**Agent Modes:**
+- **research** - reasoning, critique, python_executor (complex analysis)
+- **rag** - search, get_content, web_search (direct questions)
+
+---
+
+### Management Commands (5)
+
+#### `docs` - Document Management (14 commands)
 ```bash
-./r2r_advanced.sh search filtered "query" '{"category":"tech"}'
-./r2r_advanced.sh search strategy "query" vanilla|rag_fusion|hyde
-./r2r_advanced.sh search graph "query" <collection_id>
+# List documents
+r2r docs list --limit 20
+r2r docs list -l 10 -o 5 -q                 # with offset, quiet
+
+# Get document
+r2r docs get abc123-def456
+r2r docs get abc123 --json
+
+# Upload document
+r2r docs upload path/to/file.pdf
+r2r docs upload file.txt --collection abc123
+
+# Delete document
+r2r docs delete abc123-def456
+
+# Extract knowledge graph
+r2r docs extract abc123
+
+# Full command list
+r2r docs help
 ```
 
-#### Analytics
+---
+
+#### `collections` - Collection Management (6 commands)
 ```bash
-./r2r_advanced.sh analytics collection <collection_id>
-./r2r_advanced.sh analytics document <document_id>
+# List collections
+r2r collections list --limit 10
+r2r collections list -l 5 -q
+
+# Get collection
+r2r collections get abc123-def456
+
+# Create collection
+r2r collections create "My Collection" "Description"
+r2r collections create --name "Collection" --desc "Info"
+r2r collections create -n "Quick Create"
+
+# Delete collection
+r2r collections delete abc123
+
+# Add document to collection
+r2r collections add-doc collection123 doc456
+r2r collections add-doc -c collection123 -d doc456
+
+# Remove document from collection
+r2r collections remove-doc collection123 doc456
+
+# Full command list
+r2r collections help
 ```
 
-#### Demo Workflow
+---
+
+#### `conversation` - Conversation Management (5 commands)
 ```bash
-./r2r_advanced.sh demo  # Полный демонстрационный цикл
+# Create conversation
+r2r conversation create "Research Session"
+r2r conversation create -n "My Session"
+
+# List conversations
+r2r conversation list --limit 10
+r2r conversation list -l 5 -q
+
+# Get conversation
+r2r conversation get abc123-def456
+
+# Add message
+r2r conversation add-message abc123 system "Be helpful"
+r2r conversation add-message -c abc123 -r user -m "Hello"
+
+# Delete conversation
+r2r conversation delete abc123
+
+# Workflow with CONV_ID
+r2r conversation create "Session"
+CONV_ID=$(head -1 /tmp/.r2r_conversation_id)
+r2r conversation add-message $CONV_ID system "Expert mode"
+
+# Full command list
+r2r conversation help
 ```
 
-### R2R_EXAMPLES.md - Подробная документация
+---
 
-Comprehensive guide с:
-- 26 примеров кода с ожидаемыми результатами
-- Production workflows
-- Performance benchmarks
-- Best practices
-- Troubleshooting guide
-
-## Конфигурация
-
-**Environment Variables:**
-Скрипты загружают переменные из `.claude/config/.env`:
+#### `graph` - Knowledge Graph Operations (20 commands)
 ```bash
-R2R_BASE_URL=https://api.136-119-36-216.nip.io
-API_KEY=your_api_key_here
+# List entities
+r2r graph entities abc123 --limit 50
+
+# List relationships
+r2r graph relationships abc123 --limit 30
+
+# List communities
+r2r graph communities abc123
+
+# Create entity
+r2r graph create-entity abc123 "Entity Name" "Description" "Category"
+
+# Build communities
+r2r graph build-communities abc123
+
+# Pull (sync) graph
+r2r graph pull abc123
+
+# Full command list
+r2r graph help
 ```
 
-**Расположение:**
-- `.claude/config/.env` - конфигурация для bash скриптов
+---
 
-## Интеграция с Claude Code
+#### `analytics` - System Analytics (3 commands)
+```bash
+# System stats
+r2r analytics system
+r2r analytics system -q                     # quiet: one line
 
-### Slash Commands
+# Collection analytics
+r2r analytics collection abc123
+r2r analytics collection abc123 --json
 
-Команды в `.claude/commands/` автоматически используют эти скрипты:
+# Document analytics
+r2r analytics document abc123
+r2r analytics document abc123 -q
 
-- `/r2r-search "query"` → `r2r_client.sh search`
-- `/r2r-rag "query"` → `r2r_client.sh rag`
-- `/r2r-agent "message"` → `r2r_client.sh agent`
-- `/r2r-collections` → `r2r_advanced.sh collections`
-- `/r2r-upload <file>` → `r2r_advanced.sh docs upload`
+# Full command list
+r2r analytics help
+```
 
-### Настройки
+---
 
-`settings.json` обновлен для использования bash скриптов вместо MCP сервера:
-```json
+## 🎨 Output Modes
+
+Все команды поддерживают три режима вывода:
+
+### Default - Readable Format
+Компактный, читабельный вывод с эмодзи индикаторами.
+
+```bash
+$ r2r search "transformers" -l 3
+
+🔍 Search | limit:3
+
+[0.92] Attention is All You Need[abc12345] | The dominant sequence transduction models are based...
+[0.85] BERT: Pre-training[def67890] | We introduce a new language representation model...
+[0.78] GPT-3: Language Models[ghi11223] | We trained a 175 billion parameter model...
+```
+
+### Quiet Mode (`--quiet` / `-q`)
+Минимальный вывод для скриптов и пайпов.
+
+```bash
+$ r2r search "transformers" -l 3 -q
+
+Attention is All You Need [abc12345]
+BERT: Pre-training [def67890]
+GPT-3: Language Models [ghi11223]
+```
+
+### JSON Mode (`--json`)
+Raw JSON для парсинга и автоматизации.
+
+```bash
+$ r2r search "transformers" -l 3 --json
+
 {
-  "mcpServers": {
-    "_comment": "MCP servers disabled - using bash scripts instead",
-    "_disabled_r2r-bridge": { ... }
+  "results": {
+    "chunk_search_results": [...]
   }
 }
 ```
 
-## Agent Modes
+---
 
-### RAG Mode
-**Tools:** search_file_knowledge, search_file_descriptions, get_file_content, web_search, web_scrape
-**Best for:** Direct questions, fact retrieval
+## 🏷️ GNU-Style Flags
 
-### Research Mode (DEFAULT)
-**Tools:** rag, reasoning, critique, python_executor
-**Best for:** Complex analysis, multi-step reasoning, deep exploration
+Все команды следуют GNU стилю с короткими формами:
 
-### Extended Thinking
-**Flag:** `--thinking`
-**Budget:** 4096 tokens
-**Temperature:** 1.0
-**Best for:** Philosophical questions, deep analysis, multi-step reasoning
+| Long Form | Short | Description |
+|-----------|-------|-------------|
+| `--limit 10` | `-l 10` | Number of results |
+| `--quiet` | `-q` | Minimal output |
+| `--verbose` | `-v` | Full details |
+| `--json` | - | JSON output |
+| `--filter key=val` | `-f key=val` | Filter results |
+| `--graph` | `-g` | Enable graph |
+| `--collection id` | `-c id` | Collection ID |
+| `--max-tokens 8000` | `-t 8000` | Max tokens (RAG) |
+| `--mode research` | `-m research` | Agent mode |
 
-## Search Features
+---
 
-### Hybrid Search
-Combines:
-- **Semantic search** - Понимание концептуального смысла
-- **Fulltext search** - Точное совпадение ключевых слов
-- **Reciprocal Rank Fusion** - Объединение результатов
+## 🔧 Configuration
 
-### Search Strategies
-- `vanilla` - Стандартный semantic search
-- `rag_fusion` - Множественные запросы + RRF
-- `hyde` - Hypothetical Document Embeddings
+### Environment Variables
 
-## Характеристики производительности
+`.claude/config/.env`:
+```bash
+R2R_BASE_URL=https://api.136-119-36-216.nip.io
+API_KEY=your-api-key-here
+```
+
+### Default Settings
+
+`lib/common.sh`:
+```bash
+DEFAULT_LIMIT=3                    # Search results
+DEFAULT_MAX_TOKENS=4000            # RAG generation
+DEFAULT_MODE="research"            # Agent mode
+DEFAULT_SEARCH_STRATEGY="vanilla"  # Search strategy
+```
+
+---
+
+## 📊 Performance
 
 **Search:**
 - Latency: ~200-500ms
-- Results: 3-10 (оптимально)
-- Hybrid search: 30-50% лучшая релевантность
+- Optimal results: 3-10
+- Hybrid search: 30-50% better relevance
 
 **RAG:**
-- Latency: ~2-5s (в зависимости от max_tokens)
-- Quality: Высокая (hybrid search + GPT-4)
-- Token limit: до 16K
+- Latency: ~2-5s (depends on max_tokens)
+- Token limit: up to 16K
+- Quality: High (hybrid search + GPT-4)
 
 **Agent:**
-- Latency: ~3-10s (research mode), ~2-4s (rag mode)
+- Research mode: ~3-10s
+- RAG mode: ~2-4s
 - Extended thinking: +2-5s overhead
-- Context preservation: Да (multi-turn)
+- Context: Multi-turn preserved
 
-## Best Practices
+---
 
-1. **Используй research mode по умолчанию** для лучшего reasoning
-2. **Extended thinking** для сложных аналитических задач
-3. **Hybrid search** для баланса semantic и keyword matching
-4. **Multi-turn conversations** для сохранения контекста
-5. **Verbose flag** для debugging и анализа релевантности
-6. **JSON output** для автоматизации и обработки
+## 🎯 Best Practices
 
-## Troubleshooting
+1. **Use short forms** - `-l 10 -q` вместо `--limit 10 --quiet`
+2. **Research mode default** - Лучшее reasoning для сложных вопросов
+3. **Extended thinking** - Для аналитических задач с `--thinking`
+4. **Hybrid search** - Баланс semantic + keyword matching
+5. **Quiet mode** - Для скриптов и пайпов (`-q`)
+6. **JSON mode** - Для автоматизации (`--json`)
+7. **Multi-turn conversations** - Сохранение контекста через conversation_id
 
-**Ошибка аутентификации:**
+---
+
+## 🐛 Troubleshooting
+
+### API Key Error
 ```bash
-# Проверь .env файл
-cat r2r_fastapi/.env | grep API_KEY
+# Check .env file
+cat .claude/config/.env | grep API_KEY
+
+# Test connection
+source .claude/config/.env
+curl -s "${R2R_BASE_URL}/v3/system/health" \
+  -H "Authorization: Bearer ${API_KEY}"
 ```
 
-**Пустые результаты:**
+### Empty Results
 ```bash
-# Проверь подключение
-curl -s "${R2R_BASE_URL}/v3/system/settings" -H "Authorization: Bearer ${API_KEY}"
+# Check if documents exist
+r2r docs list -l 5
+
+# Check collection
+r2r collections list -l 5
+
+# Verify search
+r2r search "test" --json
 ```
 
-**Extended thinking не работает:**
+### Conversation ID Lost
 ```bash
-# Убедись, что модель поддерживает extended thinking
-# anthropic/claude-3-7-sonnet-20250219 - рекомендуется
-```
+# Auto-saved to temp file
+CONV_ID=$(head -1 /tmp/.r2r_conversation_id)
+r2r agent "Continue" -c $CONV_ID
 
-**Conversation ID потерян:**
-```bash
-# Используй --json и jq для извлечения
-response=$(./r2r_client.sh agent "query" --json)
+# Or extract from JSON
+response=$(r2r agent "Start" --json)
 conv_id=$(echo "$response" | jq -r '.conversation_id')
 ```
 
-## Дополнительная информация
+### Unknown Flag Error
+```bash
+# Check command help
+r2r <command> help
 
-- **R2R Documentation:** `docs/r2r/`
-- **Examples:** `R2R_EXAMPLES.md`
-- **CLAUDE.md:** R2R Quick Reference section
-- **Slash Commands:** `.claude/commands/r2r-*.md`
+# Examples:
+r2r search help
+r2r rag help
+r2r agent help
+```
+
+---
+
+## 📖 Documentation
+
+- **Command Help**: `r2r <command> help`
+- **R2R Docs**: `docs/r2r/`
+- **CLAUDE.md**: R2R Quick Reference section
+- **Slash Commands**: `.claude/commands/r2r-*.md`
+
+---
+
+## 🔗 Related
+
+- **R2R v3 API**: https://r2r-docs.sciphi.ai/api-reference
+- **R2R GitHub**: https://github.com/SciPhi-AI/R2R
+- **FastMCP**: `docs/fastmcp/`
+- **Claude Code**: `docs/claude_code/`
+
+---
+
+## 📈 Statistics
+
+**Code Size:**
+- Total: 5,419 строк (8 команд)
+- `lib/common.sh`: 43 строки (optimized)
+- `commands/`:
+  - `docs.sh`: 1,067 строк (14 подкоманд)
+  - `graph.sh`: 1,737 строк (20 подкоманд)
+  - `agent.sh`: 616 строк
+  - `search.sh`: 337 строк
+  - `rag.sh`: 358 строк
+  - `analytics.sh`: 382 строки
+  - `collections.sh`: 484 строки
+  - `conversation.sh`: 440 строк
+
+**Refactoring History:**
+- **2025-11-26**: Полный рефакторинг docs.sh и graph.sh
+  - Добавлены GNU-style флаги для всех 34 подкоманд
+  - Унифицирован ONE LINE output формат
+  - Очищен lib/common.sh от неиспользуемых функций
+  - Все 8 команд теперь следуют единому паттерну
+
+- **2025-01-26**: Создание модульной архитектуры
+  - Миграция от монолитных скриптов к модульным командам
+  - Внедрение GNU-style флагов в core commands
+  - Добавление трех режимов вывода (default/quiet/JSON)
+
+---
+
+**Last Updated**: 2025-11-26
+**R2R API Version**: v3.x
+**Script Version**: 2.1 (Fully Unified GNU-style)

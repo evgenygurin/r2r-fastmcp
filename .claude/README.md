@@ -29,11 +29,19 @@
 │   ├── SessionStart/
 │   │   └── check-r2r.md
 │   └── README.md
-├── scripts/             # Bash клиенты для R2R API
-│   ├── r2r_client.sh    # search, rag, agent
-│   ├── r2r_advanced.sh  # docs, collections, graphs
-│   ├── R2R_EXAMPLES.md  # 26+ примеров
-│   └── README.md
+├── scripts/             # Модульная CLI система для R2R API
+│   ├── r2r              # Главный dispatcher
+│   ├── lib/             # Общие функции (common.sh)
+│   ├── commands/        # 8 модульных команд (48 подкоманд)
+│   │   ├── search.sh    # Hybrid search
+│   │   ├── rag.sh       # RAG generation
+│   │   ├── agent.sh     # Multi-turn agent
+│   │   ├── docs.sh      # Document management (14 команд)
+│   │   ├── collections.sh  # Collection management (6 команд)
+│   │   ├── conversation.sh # Conversation management (5 команд)
+│   │   ├── graph.sh     # Knowledge graph ops (20 команд)
+│   │   └── analytics.sh # System analytics (3 команды)
+│   └── README.md        # Полное руководство
 ├── skills/              # Описание возможностей (3)
 │   ├── r2r-search.md
 │   ├── r2r-rag.md
@@ -46,21 +54,30 @@
 ## 🎯 Основные компоненты
 
 ### 1. Bash Scripts (`scripts/`)
-**Основной способ взаимодействия с R2R API**
+**Модульная CLI система с GNU-style интерфейсом**
 
-- `r2r_client.sh` - основные операции:
-  - `search` - hybrid search (semantic + fulltext)
-  - `rag` - RAG с генерацией (до 4000 токенов)
-  - `agent` - multi-turn research agent
+Унифицированный интерфейс `r2r` с 8 командами и 48 подкомандами:
 
-- `r2r_advanced.sh` - расширенные операции:
-  - `docs` - управление документами
-  - `collections` - коллекции и доступ
-  - `graph` - knowledge graphs
+**Core Commands (3):**
+- `search` - Hybrid search (semantic + fulltext)
+- `rag` - RAG retrieval + generation
+- `agent` - Multi-turn conversational agent
+
+**Management Commands (5):**
+- `docs` - Document management (14 подкоманд)
+- `collections` - Collection management (6 подкоманд)
+- `conversation` - Conversation management (5 подкоманд)
+- `graph` - Knowledge graph operations (20 подкоманд)
+- `analytics` - System analytics (3 подкоманды)
+
+**Ключевые особенности:**
+- GNU-style флаги (`--long` / `-short`)
+- Три режима вывода: default (emoji), quiet, JSON
+- ONE LINE компактный формат
+- Консистентные визуальные индикаторы
 
 **Документация:**
-- `scripts/README.md` - полное руководство
-- `scripts/R2R_EXAMPLES.md` - практические примеры
+- `scripts/README.md` - полное руководство (467 строк)
 
 ### 2. Slash Commands (`commands/`)
 **Интеграция с Claude Code CLI**
@@ -97,6 +114,24 @@ API_KEY=your-api-key-here
 
 ## 🚀 Quick Start
 
+### Использование через Модульный CLI
+```bash
+# Core commands
+r2r search "machine learning" --limit 5
+r2r rag "What is RAG?" --show-sources
+r2r agent "Explain transformers" --mode research
+
+# Management commands
+r2r docs list -l 10 -q
+r2r collections create "My Collection"
+r2r graph entities abc123 --limit 50
+
+# Короткие формы флагов
+r2r search "AI" -l 10 -q          # --limit + --quiet
+r2r rag "Question" -t 8000        # --max-tokens
+r2r agent "Query" -m rag          # --mode
+```
+
 ### Использование через Slash Commands
 ```bash
 /r2r-search "machine learning" 5
@@ -104,27 +139,26 @@ API_KEY=your-api-key-here
 /r2r-agent "Explain transformers"
 ```
 
-### Прямое использование скриптов
-```bash
-.claude/scripts/r2r_client.sh search "query" 5
-.claude/scripts/r2r_client.sh rag "question"
-.claude/scripts/r2r_client.sh agent "message" research
-```
-
 ### Проверка конфигурации
 ```bash
 # Проверить .env
 cat .claude/config/.env
 
-# Тест подключения
-.claude/scripts/r2r_client.sh search "test" 1
+# Тест подключения (новый CLI)
+r2r search "test" --limit 1
+
+# Или через полный путь
+.claude/scripts/r2r search "test" -l 1
 ```
 
 ## 📚 Документация
 
 ### Основная
-- `scripts/README.md` - полное руководство по bash скриптам
-- `scripts/R2R_EXAMPLES.md` - 26+ практических примеров
+- `scripts/README.md` - полное руководство (467 строк)
+  - Архитектура модульной CLI системы
+  - Все 8 команд и 48 подкоманд
+  - GNU-style флаги и режимы вывода
+  - Примеры использования
 - `SEARCH_STRATEGIES.md` - troubleshooting для search strategies
 
 ### Агенты и команды

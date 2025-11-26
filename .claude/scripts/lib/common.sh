@@ -33,32 +33,7 @@ export YELLOW='\033[1;33m'
 export RED='\033[0;31m'
 export NC='\033[0m' # No Color
 
-# Global flags
-JSON_OUTPUT=false
-VERBOSE=false
-EXTENDED_THINKING=false
-
-# Parse flags
-parse_flags() {
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            --json) JSON_OUTPUT=true; shift ;;
-            --verbose) VERBOSE=true; shift ;;
-            --thinking) EXTENDED_THINKING=true; shift ;;
-            *) break ;;
-        esac
-    done
-}
-
-# Helper functions for output
-print_header() {
-    echo -e "${BLUE}==== $1 ====${NC}"
-}
-
-print_success() {
-    echo -e "${GREEN}✓ $1${NC}"
-}
-
+# Helper functions for output (only actively used functions)
 print_error() {
     echo -e "${RED}✗ $1${NC}" >&2
 }
