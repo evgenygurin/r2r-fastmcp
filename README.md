@@ -97,6 +97,7 @@ Pythonic фреймворк для создания серверов и клие
 ### Требования
 - `CLAUDE_CODE_OAUTH_TOKEN` в GitHub repository secrets
 - Доступ к `anthropics/claude-code-action@v1`
+- Настроенный @codegen bot для автоматических исправлений
 
 См. [docs/claude_code/11-github-integration.md](./docs/claude_code/11-github-integration.md) для деталей.
 
