@@ -30,7 +30,7 @@ model: sonnet
 
 ### Primary Commands (Bash Scripts)
 - `/r2r-agent` - основной slash command (research mode)
-- `.claude/scripts/r2r_client.sh agent` - прямой вызов bash скрипта
+- `.claude/scripts/r2r agent` - прямой вызов модульного CLI
 - `/r2r-search` - дополнительный поиск
 - `/r2r-rag` - целевые запросы
 

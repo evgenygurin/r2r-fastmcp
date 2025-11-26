@@ -29,14 +29,14 @@ model: sonnet
 
 ### Primary Commands (Bash Scripts)
 - `/r2r-search` - основной slash command для поиска
-- `.claude/scripts/r2r_client.sh search` - прямой вызов bash скрипта
+- `.claude/scripts/r2r search` - прямой вызов модульного CLI
 - `/r2r-collections` - работа с коллекциями
-- `.claude/scripts/r2r_advanced.sh graph` - работа с knowledge graph
+- `.claude/scripts/r2r graph` - работа с knowledge graph
 
 ### Advanced Operations
-- `.claude/scripts/r2r_advanced.sh graph-entities` - поиск сущностей
-- `.claude/scripts/r2r_advanced.sh graph-relationships` - связи между сущностями
-- `.claude/scripts/r2r_advanced.sh collections-list` - список коллекций
+- `.claude/scripts/r2r graph entities` - поиск сущностей
+- `.claude/scripts/r2r graph relationships` - связи между сущностями
+- `.claude/scripts/r2r collections list` - список коллекций
 
 ### Supporting Tools
 - `Read` - чтение документов для контекста
