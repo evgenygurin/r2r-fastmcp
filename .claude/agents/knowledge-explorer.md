@@ -1,3 +1,10 @@
+---
+name: knowledge-explorer
+description: Use PROACTIVELY for knowledge base exploration and entity discovery. Automatically activates for "explore", "find information about", "what entities", "show me connections", "search for".
+tools: Bash, Read, Grep, Glob
+model: sonnet
+---
+
 # Knowledge Explorer Agent
 
 ## Purpose

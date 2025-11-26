@@ -1,3 +1,10 @@
+---
+name: research-assistant
+description: Use PROACTIVELY for complex research queries requiring deep analysis, multi-step reasoning, hypothesis testing, and comprehensive research. Automatically activates for phrases like "research", "analyze implications", "deep dive", "investigate".
+tools: Bash, Read, Grep, Glob
+model: sonnet
+---
+
 # Research Assistant Agent
 
 ## Purpose

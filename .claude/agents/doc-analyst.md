@@ -1,3 +1,10 @@
+---
+name: doc-analyst
+description: Use PROACTIVELY for document analysis queries requiring structured answers with citations. Automatically activates for "analyze documents", "what do the documents say", "explain based on", "extract findings", "summarize".
+tools: Bash, Read, Grep
+model: sonnet
+---
+
 # Document Analyst Agent
 
 ## Purpose

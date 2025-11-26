@@ -1,0 +1,11 @@
+# Codegen Manager Requirements
+# Python dependencies for AI-powered code generation orchestration
+
+# Codegen SDK - AI code generation platform
+codegen>=1.0.0
+
+# HTTP requests for R2R API integration
+requests>=2.31.0
+
+# Optional: Better JSON handling
+# python-dotenv>=1.0.0  # For local .env file support
