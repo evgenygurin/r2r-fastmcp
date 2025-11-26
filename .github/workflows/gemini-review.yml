@@ -1,0 +1,145 @@
+name: Gemini Documentation Review
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'docs/**/*.md'
+      - '.claude/**/*.md'
+
+jobs:
+  review-docs:
+    name: Review Documentation Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get changed markdown files
+        id: changed-files
+        run: |
+          # Get list of changed .md files
+          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.md$' > changed_files.txt || true
+          
+          if [ -s changed_files.txt ]; then
+            echo "📝 Changed documentation files: $(wc -l < changed_files.txt)"
+            cat changed_files.txt
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No markdown files changed"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Setup Python
+        if: steps.changed-files.outputs.has_changes == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          pip install google-generativeai requests
+      
+      - name: Review documentation with Gemini
+        if: steps.changed-files.outputs.has_changes == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          python3 << 'EOF'
+          import os
+          import sys
+          import google.generativeai as genai
+          
+          api_key = os.environ.get('GEMINI_API_KEY')
+          if not api_key:
+              print("❌ GEMINI_API_KEY secret not configured")
+              sys.exit(1)
+          
+          # Configure Gemini API (AI Studio, not Vertex AI)
+          genai.configure(api_key=api_key)
+          model = genai.GenerativeModel('gemini-1.5-flash')
+          
+          # Read changed files
+          with open('changed_files.txt', 'r') as f:
+              changed_files = [line.strip() for line in f if line.strip()]
+          
+          if not changed_files:
+              print("✅ No documentation files to review")
+              sys.exit(0)
+          
+          print(f"📝 Reviewing {len(changed_files)} files...")
+          
+          # Prepare diff for each file
+          reviews = []
+          for filepath in changed_files:
+              try:
+                  with open(filepath, 'r', encoding='utf-8') as f:
+                      content = f.read()
+                  
+                  prompt = f"""Вы - технический рецензент русскоязычной документации.
+
+          Файл: {filepath}
+
+          Проверьте документацию на:
+          1. Грамматические ошибки и опечатки
+          2. Техническую точность
+          3. Полноту примеров кода
+          4. Консистентность терминологии (русский текст + английские термины)
+          5. Наличие эмодзи в заголовках H2 (должны быть)
+          6. Корректность внутренних ссылок
+          
+          Формат ответа:
+          - ✅ Если все хорошо
+          - ⚠️ Предупреждения (не критичные)
+          - ❌ Ошибки (требуют исправления)
+          
+          Будьте кратки и конкретны.
+          
+          ---
+          {content[:4000]}  # Limit to first 4000 chars
+          """
+                  
+                  response = model.generate_content(prompt)
+                  reviews.append(f"## {filepath}\n\n{response.text}\n")
+                  
+              except Exception as e:
+                  reviews.append(f"## {filepath}\n\n❌ Ошибка при обработке: {str(e)}\n")
+          
+          # Write review to file
+          with open('review_output.md', 'w', encoding='utf-8') as f:
+              f.write("# 🤖 Gemini Documentation Review\n\n")
+              f.write('\n'.join(reviews))
+          
+          # Print summary
+          print("\n📊 Review Summary:")
+          with open('review_output.md', 'r', encoding='utf-8') as f:
+              print(f.read())
+          EOF
+      
+      - name: Post review as comment
+        if: steps.changed-files.outputs.has_changes == 'true' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            if (!fs.existsSync('review_output.md')) {
+              console.log('No review output found');
+              return;
+            }
+            
+            const review = fs.readFileSync('review_output.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: review
+            });
