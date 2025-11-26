@@ -21,18 +21,31 @@ r2r-fastmcp/
 │   ├── fastmcp/                   # 8 разделов (01-08-*.md + README.md)
 │   └── claude_code/               # 13 разделов (01-13-*.md + README.md + SUMMARY.md)
 ├── .claude/                       # ⚙️ Интеграция с R2R API
-│   ├── scripts/                   # Bash клиенты для R2R v3 API
-│   │   ├── r2r_client.sh         # search, rag, agent (основной)
-│   │   ├── r2r_advanced.sh       # documents, collections, graphs
+│   ├── scripts/                   # Модульная CLI система для R2R API
+│   │   ├── r2r                    # Главный dispatcher
+│   │   ├── lib/common.sh          # Общие функции (43 строки)
+│   │   ├── commands/              # 8 команд (48 подкоманд)
+│   │   │   ├── search.sh          # Hybrid search
+│   │   │   ├── rag.sh             # RAG generation
+│   │   │   ├── agent.sh           # Multi-turn agent
+│   │   │   ├── docs.sh            # Document management (14 команд)
+│   │   │   ├── collections.sh     # Collection management (6 команд)
+│   │   │   ├── conversation.sh    # Conversation management (5 команд)
+│   │   │   ├── graph.sh           # Knowledge graph (20 команд)
+│   │   │   └── analytics.sh       # System analytics (3 команды)
+│   │   ├── examples.sh            # Interactive examples (50+)
+│   │   ├── workflows.sh           # Automated workflows (5)
+│   │   ├── quick.sh               # Quick tasks (10)
+│   │   ├── aliases.sh             # Shell aliases
 │   │   └── README.md
-│   ├── commands/                  # 10 slash commands для Claude Code
-│   │   ├── /r2r-search           # Поиск в knowledge base
-│   │   ├── /r2r-rag              # RAG запросы с генерацией
-│   │   ├── /r2r-agent            # Multi-turn агент
-│   │   ├── /r2r-collections      # Управление коллекциями
-│   │   ├── /r2r-upload           # Загрузка документов
-│   │   ├── /doc-search           # Поиск по локальной документации
-│   │   └── /r2r                  # Quick reference
+│   ├── commands/                  # Slash commands (15)
+│   │   ├── r2r*.md                # R2R команды (9)
+│   │   │   ├── r2r.md, r2r-search.md, r2r-rag.md
+│   │   │   ├── r2r-agent.md, r2r-collections.md, r2r-upload.md
+│   │   │   └── r2r-examples.md, r2r-workflows.md, r2r-quick.md
+│   │   └── cc*.md                 # Claude Code документация (6)
+│   │       ├── cc.md, cc-hooks.md, cc-commands.md
+│   │       └── cc-mcp.md, cc-subagents.md, cc-setup.md
 │   ├── agents/                    # 3 специализированных агента
 │   │   ├── research-assistant.md # Research mode с reasoning
 │   │   ├── doc-analyst.md        # RAG-анализ документов
@@ -56,48 +69,64 @@ R2R_BASE_URL=https://api.136-119-36-216.nip.io
 API_KEY=your-api-key-here
 ```
 
-**Прямые вызовы bash скриптов:**
+**Модульный CLI (8 команд, 48 подкоманд):**
 
 ```bash
-# Search (hybrid: semantic + fulltext)
-.claude/scripts/r2r_client.sh search "query" 5
-.claude/scripts/r2r_client.sh search "query" 10 --verbose
-.claude/scripts/r2r_client.sh search "query" --json
+# Core commands
+.claude/scripts/r2r search "query" --limit 5
+.claude/scripts/r2r rag "question" --max-tokens 8000
+.claude/scripts/r2r agent "query" --mode research --thinking
 
-# RAG (retrieval + generation)
-.claude/scripts/r2r_client.sh rag "question" 4000
-.claude/scripts/r2r_client.sh rag "question" --json
-
-# Agent (research/rag modes, multi-turn)
-.claude/scripts/r2r_client.sh agent "query"
-.claude/scripts/r2r_client.sh agent "query" research
-.claude/scripts/r2r_client.sh agent "query" research "conversation_id"
-.claude/scripts/r2r_client.sh agent "query" research "" "" --thinking
-
-# Documents management
-.claude/scripts/r2r_advanced.sh docs list
-.claude/scripts/r2r_advanced.sh docs create path/to/file.pdf
-.claude/scripts/r2r_advanced.sh docs delete document_id
-
-# Collections
-.claude/scripts/r2r_advanced.sh collections list
-.claude/scripts/r2r_advanced.sh collections create "Collection Name"
-
-# Knowledge Graph
-.claude/scripts/r2r_advanced.sh graph pull collection_id
-.claude/scripts/r2r_advanced.sh graph entities collection_id
+# Management commands
+.claude/scripts/r2r docs list -l 10 -q
+.claude/scripts/r2r collections create -n "Name" -d "Description"
+.claude/scripts/r2r conversation list
+.claude/scripts/r2r graph entities <collection_id> -l 50
+.claude/scripts/r2r analytics system
 ```
 
-**Slash команды Claude Code:**
+**Slash команды Claude Code (15):**
 
 ```bash
-/r2r-search "query" [limit]        # Поиск в knowledge base
-/r2r-rag "question"                # RAG запрос с генерацией
-/r2r-agent "query"                 # Multi-turn research agent
-/r2r-collections                   # Управление коллекциями
-/r2r-upload path/to/file          # Загрузить документ
-/r2r                              # Quick reference
-/doc-search "keyword"              # Поиск по локальной документации
+# Core Operations
+/r2r-search "query" [limit]
+/r2r-rag "question" [max_tokens]
+/r2r-agent "message" [mode]
+/r2r-collections [action]
+/r2r-upload <file> [collection_id]
+
+# Helper Scripts
+/r2r-quick <task> [args]      # ask, status, up, col, continue, etc.
+/r2r-workflows <workflow>     # upload, create-collection, research, etc.
+/r2r-examples [category]      # search, rag, agent, docs, etc.
+
+# Claude Code Documentation
+/cc                           # Quick reference
+/cc-hooks                     # Hooks documentation
+/cc-commands                  # Custom commands guide
+/cc-mcp                       # MCP integration
+/cc-subagents                 # Subagents guide
+/cc-setup                     # Installation guide
+```
+
+**Helper Scripts:**
+
+```bash
+# Quick Tasks (.claude/scripts/quick.sh)
+./quick.sh ask "query"        # Search + RAG answer
+./quick.sh status             # System status
+./quick.sh up file.pdf        # Quick upload
+
+# Workflows (.claude/scripts/workflows.sh)
+./workflows.sh upload paper.pdf
+./workflows.sh create-collection "Name" "Desc" *.pdf
+./workflows.sh research "query"
+
+# Aliases (.claude/scripts/aliases.sh - source в .bashrc/.zshrc)
+source .claude/scripts/aliases.sh
+rs "query"   # r2r search
+rr "q"       # r2r rag
+ra "msg"     # r2r agent
 ```
 
 ### Работа с документацией
@@ -130,20 +159,18 @@ du -sh docs/r2r docs/fastmcp docs/claude_code
 
 ```text
 ┌─────────────────┐
-│  Claude Code    │  CLI (10 slash commands)
-│  (Frontend)     │
+│  Claude Code    │  Slash Commands (15)
+│  (Frontend)     │  /r2r-* (9) + /cc-* (6)
 └────────┬────────┘
-         │ Bash scripts (.claude/scripts/)
          │
 ┌────────▼────────┐
-│ Modular Scripts │  search, rag, agent, docs, collections, graph, analytics
-│  (Middleware)   │  Main: r2r CLI → commands/*.sh → lib/common.sh
+│ Modular CLI     │  r2r dispatcher → commands/*.sh
+│  (Middleware)   │  + helpers: examples, workflows, quick, aliases
 └────────┬────────┘
-         │ curl + jq → JSON payloads → R2R v3 REST API
-         │
+         │ curl + jq → JSON
 ┌────────▼────────┐
 │      R2R        │  https://api.136-119-36-216.nip.io
-│   (Backend)     │  PostgreSQL + pgvector + Hatchet
+│   (Backend)     │  8 команд, 48 подкоманд
 └─────────────────┘
 ```
 
@@ -348,17 +375,14 @@ fd -e md . docs/r2r/ | sort
 
 ### Конфигурация R2R
 - `.claude/config/.env` - API credentials
-- `.claude/scripts/r2r` - main CLI entry point (dispatcher)
-- `.claude/scripts/lib/common.sh` - shared configuration and utilities
-- `.claude/scripts/commands/` - modular command implementations:
-  - `search.sh` - hybrid search с фильтрами, стратегиями, graph search
-  - `rag.sh` - RAG retrieval + generation
-  - `agent.sh` - multi-turn agent (research/rag modes)
-  - `docs.sh` - document management (list, get, upload, delete)
-  - `collections.sh` - collection management
-  - `graph.sh` - knowledge graph operations
-  - `analytics.sh` - collection/document/system analytics
-- `.claude/docs/SEARCH_STRATEGIES.md` - troubleshooting для стратегий
+- `.claude/scripts/r2r` - main CLI dispatcher
+- `.claude/scripts/lib/common.sh` - shared configuration
+- `.claude/scripts/commands/` - 8 modular commands:
+  - search.sh, rag.sh, agent.sh, docs.sh
+  - collections.sh, conversation.sh, graph.sh, analytics.sh
+- `.claude/scripts/` - 4 helper scripts:
+  - examples.sh, workflows.sh, quick.sh, aliases.sh
+- `.claude/docs/SEARCH_STRATEGIES.md` - troubleshooting
 
 ### Документация навигация
 - `docs/r2r/README.md` - R2R documentation index
@@ -367,9 +391,9 @@ fd -e md . docs/r2r/ | sort
 - `docs/claude_code/SUMMARY.md` - краткое содержание
 
 ### Миграция notes
-- `.claude/MIGRATION.md` - история миграции от MCP к bash
-- `.claude/VERIFICATION.md` - verification report после миграции
-- `.claude/DONE.md` - завершенные задачи
+- `.claude/docs/migration/SUMMARY.md`
+- `.claude/docs/migration/VERIFICATION.md`
+- `.claude/docs/migration/README.md`
 
 ## 🎯 Ключевые принципы
 

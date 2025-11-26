@@ -46,6 +46,42 @@ Pythonic фреймворк для создания серверов и клие
 
 ---
 
+## ⚙️ R2R Integration
+
+Репозиторий включает полную интеграцию с R2R v3 API:
+
+### Modular CLI (8 команд, 48 подкоманд)
+```bash
+.claude/scripts/r2r search "query" --limit 5
+.claude/scripts/r2r rag "question" --show-sources
+.claude/scripts/r2r agent "query" --mode research --thinking
+.claude/scripts/r2r docs list -l 10 -q
+.claude/scripts/r2r collections create -n "Name"
+.claude/scripts/r2r conversation list
+.claude/scripts/r2r graph entities <id> -l 50
+.claude/scripts/r2r analytics system
+```
+
+### Slash Commands (15)
+- **R2R Core:** `/r2r-search`, `/r2r-rag`, `/r2r-agent`
+- **R2R Management:** `/r2r-collections`, `/r2r-upload`, `/r2r`
+- **R2R Helpers:** `/r2r-examples`, `/r2r-workflows`, `/r2r-quick`
+- **Claude Code:** `/cc`, `/cc-hooks`, `/cc-commands`, `/cc-mcp`, `/cc-subagents`, `/cc-setup`
+
+### Helper Scripts
+- `examples.sh` - 50+ interactive examples
+- `workflows.sh` - 5 automated workflows
+- `quick.sh` - 10 quick tasks
+- `aliases.sh` - shell shortcuts
+
+### Agents & Skills
+- 3 специализированных агента
+- 3 skills для R2R
+
+Подробнее: [.claude/README.md](.claude/README.md)
+
+---
+
 ## 🚀 Быстрый старт
 
 ### Навигация по документации
@@ -59,6 +95,24 @@ docs/fastmcp/README.md
 
 # Полная документация Claude Code (13 разделов)
 docs/claude_code/README.md
+```
+
+### R2R Quick Start
+
+```bash
+# Поиск в knowledge base
+.claude/scripts/r2r search "R2R documentation" --limit 5
+
+# RAG запрос
+.claude/scripts/r2r rag "Как настроить hybrid search?"
+
+# Agent conversation
+.claude/scripts/r2r agent "Explain transformers" --thinking
+
+# Через slash commands
+/r2r-search "query" 5
+/r2r-rag "question"
+/r2r-agent "message" research
 ```
 
 ### Quick Reference
@@ -115,18 +169,20 @@ docs/claude_code/README.md
 
 ## 🔗 Интеграции
 
-Документация включает примеры интеграции технологий друг с другом:
+### R2R API Integration
+Полная интеграция с R2R v3 через модульный bash CLI:
+- GNU-style флаги (`--limit`, `-l`, `--quiet`, `-q`)
+- Три режима вывода: default, quiet, JSON
+- 8 команд с 48 подкомандами
+- Slash commands для Claude Code
 
-### FastMCP + Claude Code
-Создание MCP серверов для расширения возможностей Claude Code
+### Claude Code Integration
+- 15 slash commands для быстрого доступа
+- 3 специализированных агента
+- Hooks для автоматизации
+- CLAUDE.md для контекста проекта
 
-### R2R + FastMCP
-Использование R2R как backend для MCP tools (RAG, Knowledge Graph)
-
-### R2R + Claude Code (через MCP)
-Полный стек для context-aware разработки с RAG
-
-Примеры см. в [CLAUDE.md - Интеграции](./CLAUDE.md#🔗-интеграции-между-технологиями)
+Подробнее в [.claude/README.md](.claude/README.md)
 
 ---
 
@@ -136,13 +192,19 @@ docs/claude_code/README.md
 
 ```text
 r2r-fastmcp/
-├── README.md              # Этот файл
-├── CLAUDE.md              # Quick Reference + интеграции
 ├── docs/
-│   ├── r2r/              # 8 файлов + README
-│   ├── fastmcp/          # 8 файлов + README
-│   └── claude_code/      # 13 файлов + README + SUMMARY
-└── .gitignore
+│   ├── r2r/              # R2R v3 документация (8 разделов)
+│   ├── fastmcp/          # FastMCP 2.x документация (8 разделов)
+│   └── claude_code/      # Claude Code документация (13 разделов)
+├── .claude/              # Claude Code интеграция
+│   ├── commands/         # 15 slash commands
+│   ├── scripts/          # Модульный R2R CLI (8 команд, 48 подкоманд)
+│   ├── agents/           # 3 специализированных агента
+│   ├── skills/           # 3 R2R skills
+│   ├── hooks/            # Lifecycle hooks
+│   └── config/           # .env конфигурация
+├── CLAUDE.md             # Project memory для Claude Code
+└── README.md             # Этот файл
 ```
 
 ### Работа с документацией
