@@ -82,6 +82,26 @@ Pythonic фреймворк для создания серверов и клие
 
 ---
 
+## 🤖 GitHub Workflows
+
+Репозиторий включает автоматизацию через Claude Code GitHub Actions:
+
+### Доступные workflows
+- **claude-code-review.yml** - автоматический code review для Pull Requests
+- **ci-failure-auto-fix.yml** - автоматическое исправление упавших CI тестов
+- **issue-triage.yml** - автоматическая сортировка новых issues
+- **issue-deduplication.yml** - поиск дубликатов issues
+- **manual-code-analysis.yml** - ручной запуск анализа кода
+- **test-failure-analysis.yml** - анализ упавших тестов
+
+### Требования
+- `CLAUDE_CODE_OAUTH_TOKEN` в GitHub repository secrets
+- Доступ к `anthropics/claude-code-action@v1`
+
+См. [docs/claude_code/11-github-integration.md](./docs/claude_code/11-github-integration.md) для деталей.
+
+---
+
 ## 🚀 Быстрый старт
 
 ### Навигация по документации
