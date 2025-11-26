@@ -11,8 +11,18 @@ def main():
         print("❌ GEMINI_API_KEY secret not configured")
         sys.exit(1)
     
+    # Validate API key format (AI Studio keys start with 'AIza')
+    if not api_key.startswith('AIza'):
+        print("⚠️ Warning: API key doesn't match AI Studio format (should start with 'AIza')")
+        print("💡 Make sure you're using Google AI Studio API key, not Vertex AI credentials")
+    
     # Configure Gemini API (AI Studio, not Vertex AI)
-    genai.configure(api_key=api_key)
+    try:
+        genai.configure(api_key=api_key)
+    except Exception as e:
+        print(f"❌ Failed to configure Gemini API: {e}")
+        print("💡 Get API key from: https://aistudio.google.com/app/apikey")
+        sys.exit(1)
     
     # Use a more specific model configuration for AI Studio
     generation_config = {
@@ -163,10 +173,20 @@ def main():
                 else:
                     reviews.append(f"## 📄 {filepath}\n\n⚠️ **Предупреждение**: Gemini API не вернул ответ. Возможно, превышены лимиты или проблема с настройкой.\n\n**Краткий обзор вручную:**\n- Файл содержит {len(content.split())} слов\n- Проверьте техническую точность API endpoints\n- Убедитесь в консистентности терминологии\n- Проверьте форматирование и эмодзи в заголовках\n\n---\n")
             except Exception as api_error:
-                if "401" in str(api_error) and "CREDENTIALS_MISSING" in str(api_error):
-                    reviews.append(f"## 📄 {filepath}\n\n⚠️ **Gemini API недоступен**: {str(api_error)}\n\n**Автоматическая проверка:**\n- ✅ Файл читается корректно ({len(content.split())} слов)\n- 📝 Требуется ручная проверка технической точности\n- 🔍 Проверьте внутренние ссылки и форматирование\n- 🎯 Убедитесь в наличии эмодзи в H2 заголовках\n\n---\n")
+                if "401" in str(api_error) or "CREDENTIALS_MISSING" in str(api_error):
+                    reviews.append(f"## 📄 {filepath}\n\n⚠️ **Gemini API недоступен** (401 Credentials Missing)\n\n" +
+                        "**Причина**: Используется неправильный тип API ключа.\n\n" +
+                        "**Решение**:\n" +
+                        "1. Получите API ключ из Google AI Studio: https://aistudio.google.com/app/apikey\n" +
+                        "2. Убедитесь, что ключ начинается с `AIza...` (не Vertex AI)\n" +
+                        "3. Добавьте секрет `GEMINI_API_KEY` в GitHub repository settings\n\n" +
+                        "**Базовая проверка файла:**\n" +
+                        f"- ✅ Файл содержит {len(content.split())} слов\n" +
+                        "- 📝 Требуется ручная проверка технической точности\n" +
+                        "- 🔍 Проверьте внутренние ссылки и форматирование\n" +
+                        "- 🎯 Убедитесь в наличии эмодзи в H2 заголовках\n\n---\n")
                 else:
-                    reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка API**: {str(api_error)}\n\n---\n")
+                    reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка Gemini API**: {str(api_error)}\n\n---\n")
             
         except Exception as e:
             reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка при обработке файла**: {str(e)}\n\n---\n")
