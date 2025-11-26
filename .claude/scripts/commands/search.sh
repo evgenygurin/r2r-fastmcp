@@ -192,7 +192,7 @@ r2r_search() {
 
     # Quiet mode: minimal output
     if [ "$quiet" = true ]; then
-        echo "$response" | jq -r '.results.chunk_search_results[] |
+        echo "$response" | jq -r --argjson lim "$limit" '.results.chunk_search_results[:$lim][] |
             "\(.metadata.title // "Unknown") [\(.id[:8])]"'
         return 0
     fi
@@ -206,7 +206,7 @@ r2r_search() {
         echo "No results found"
     elif [ "$verbose" = true ]; then
         # Verbose mode: full metadata
-        echo "$response" | jq -r '.results.chunk_search_results[] |
+        echo "$response" | jq -r --argjson lim "$limit" '.results.chunk_search_results[:$lim][] |
             "Score: \(.score | tonumber | . * 100 | round / 100)\n" +
             "Document ID: \(.document_id)\n" +
             "Chunk ID: \(.id[:8])\n" +
@@ -216,7 +216,7 @@ r2r_search() {
             "---"'
     else
         # Compact mode: one line per result - [score] title [id] | preview
-        echo "$response" | jq -r '.results.chunk_search_results[] |
+        echo "$response" | jq -r --argjson lim "$limit" '.results.chunk_search_results[:$lim][] |
             "[\(.score | tonumber | . * 100 | round / 100)] \(.metadata.title // "Unknown")[\(.id[:8])] | \(.text[:100])..."'
     fi
 

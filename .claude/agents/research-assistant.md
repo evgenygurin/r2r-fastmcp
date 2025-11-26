@@ -1,3 +1,10 @@
+---
+name: research-assistant
+description: Use PROACTIVELY for complex research queries requiring deep analysis, multi-step reasoning, hypothesis testing, and comprehensive research. Automatically activates for phrases like "research", "analyze implications", "deep dive", "investigate".
+tools: Bash, Read, Grep, Glob
+model: sonnet
+---
+
 # Research Assistant Agent
 
 ## Purpose
@@ -23,7 +30,7 @@
 
 ### Primary Commands (Bash Scripts)
 - `/r2r-agent` - основной slash command (research mode)
-- `.claude/scripts/r2r_client.sh agent` - прямой вызов bash скрипта
+- `.claude/scripts/r2r agent` - прямой вызов модульного CLI
 - `/r2r-search` - дополнительный поиск
 - `/r2r-rag` - целевые запросы
 

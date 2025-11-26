@@ -1,3 +1,10 @@
+---
+name: doc-analyst
+description: Use PROACTIVELY for document analysis queries requiring structured answers with citations. Automatically activates for "analyze documents", "what do the documents say", "explain based on", "extract findings", "summarize".
+tools: Bash, Read, Grep
+model: sonnet
+---
+
 # Document Analyst Agent
 
 ## Purpose
@@ -22,13 +29,13 @@
 
 ### Primary Commands (Bash Scripts)
 - `/r2r-rag` - основной slash command для RAG запросов
-- `.claude/scripts/r2r_client.sh rag` - прямой вызов bash скрипта
+- `.claude/scripts/r2r rag` - прямой вызов модульного CLI
 - `/r2r-search` - поиск релевантных документов
 
 ### Advanced Operations
-- `.claude/scripts/r2r_advanced.sh docs-list` - список документов
-- `.claude/scripts/r2r_advanced.sh docs-get` - получить конкретный документ
-- `.claude/scripts/r2r_advanced.sh search-filtered` - поиск с фильтрами
+- `.claude/scripts/r2r docs list` - список документов
+- `.claude/scripts/r2r docs get` - получить конкретный документ
+- `.claude/scripts/r2r search` - поиск с фильтрами
 
 ### Supporting Tools
 - `Read` - чтение локальных файлов

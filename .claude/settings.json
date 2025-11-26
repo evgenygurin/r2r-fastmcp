@@ -1,1 +1,96 @@
-{}
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": ".claude/hooks/SessionStart/check-r2r.md"
+      },
+      {
+        "type": "command",
+        "command": ".claude/hooks/SessionStart/load-r2r-context.md"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/PreToolUse/log-r2r-commands.md"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/PostToolUse/log-r2r-results.md"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allowedTools": [
+      "Read(**/*.{md,txt,json,py,js,ts,sh,yml,yaml})",
+      "Bash(.claude/scripts/**)",
+      "Bash(r2r:*)",
+      "Grep",
+      "Glob",
+      "LS",
+      "SemanticSearch"
+    ],
+    "deniedTools": [
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Edit(/config/*)",
+      "Write(/secrets/*)"
+    ]
+  },
+  "permissionMode": "default",
+  "sandbox": {
+    "allowUnsandboxedCommands": false
+  },
+  "skills": {
+    "enabled": true,
+    "autoLoad": [
+      "r2r-document-analyzer",
+      "r2r-knowledge-explorer-skill",
+      "r2r-research-assistant-skill"
+    ]
+  },
+  "agents": {
+    "enabled": true,
+    "projectAgents": [
+      "research-assistant",
+      "doc-analyst",
+      "knowledge-explorer"
+    ]
+  },
+  "commands": {
+    "enabled": true,
+    "projectCommands": [
+      "r2r",
+      "r2r-search",
+      "r2r-rag",
+      "r2r-agent",
+      "r2r-collections",
+      "r2r-upload",
+      "r2r-examples",
+      "r2r-workflows",
+      "r2r-quick",
+      "cc",
+      "cc-hooks",
+      "cc-commands",
+      "cc-mcp",
+      "cc-subagents",
+      "cc-setup"
+    ]
+  },
+  "telemetry": {
+    "enabled": false
+  }
+}

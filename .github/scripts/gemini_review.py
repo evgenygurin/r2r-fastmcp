@@ -3,29 +3,21 @@
 
 import os
 import sys
-import google.generativeai as genai
+from google import genai
+from google.genai import types, errors
 
 def main():
     api_key = os.environ.get('GEMINI_API_KEY')
     if not api_key:
         print("❌ GEMINI_API_KEY secret not configured")
         sys.exit(1)
-    
-    # Configure Gemini API (AI Studio, not Vertex AI)
-    genai.configure(api_key=api_key)
-    
-    # Use a more specific model configuration for AI Studio
-    generation_config = {
-        "temperature": 0.7,
-        "top_p": 0.8,
-        "top_k": 40,
-        "max_output_tokens": 8192,
-    }
-    
-    model = genai.GenerativeModel(
-        model_name='gemini-1.5-flash',
-        generation_config=generation_config
-    )
+
+    # Use new Google Gen AI SDK (not deprecated google-generativeai)
+    try:
+        client = genai.Client(api_key=api_key)
+    except errors.APIError as e:
+        print(f"❌ Failed to initialize Gemini client: {e.code} - {e.message}")
+        sys.exit(1)
     
     # Read project context from CLAUDE.md
     project_context = ""
@@ -157,16 +149,25 @@ def main():
             prompt = "\n".join(prompt_parts)
             
             try:
-                response = model.generate_content(prompt)
+                # Use new SDK method
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=prompt
+                )
                 if response.text:
                     reviews.append(f"## 📄 {filepath}\n\n{response.text}\n\n---\n")
                 else:
                     reviews.append(f"## 📄 {filepath}\n\n⚠️ **Предупреждение**: Gemini API не вернул ответ. Возможно, превышены лимиты или проблема с настройкой.\n\n**Краткий обзор вручную:**\n- Файл содержит {len(content.split())} слов\n- Проверьте техническую точность API endpoints\n- Убедитесь в консистентности терминологии\n- Проверьте форматирование и эмодзи в заголовках\n\n---\n")
-            except Exception as api_error:
-                if "401" in str(api_error) and "CREDENTIALS_MISSING" in str(api_error):
-                    reviews.append(f"## 📄 {filepath}\n\n⚠️ **Gemini API недоступен**: {str(api_error)}\n\n**Автоматическая проверка:**\n- ✅ Файл читается корректно ({len(content.split())} слов)\n- 📝 Требуется ручная проверка технической точности\n- 🔍 Проверьте внутренние ссылки и форматирование\n- 🎯 Убедитесь в наличии эмодзи в H2 заголовках\n\n---\n")
+            except errors.APIError as api_error:
+                print(f"⚠️ API Error: {api_error.code} - {api_error.message}")
+                if api_error.code == 400:
+                    reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка API (400 - Invalid API Key)**: {api_error.message}\n\n**Решение:** Проверьте правильность GEMINI_API_KEY в GitHub Secrets\n\n**Автоматическая проверка:**\n- ✅ Файл читается корректно ({len(content.split())} слов)\n- 📝 Требуется ручная проверка технической точности\n- 🔍 Проверьте внутренние ссылки и форматирование\n- 🎯 Убедитесь в наличии эмодзи в H2 заголовках\n\n---\n")
+                elif api_error.code == 429:
+                    reviews.append(f"## 📄 {filepath}\n\n⚠️ **Rate Limit (429)**: {api_error.message}\n\n**Автоматическая проверка:**\n- ✅ Файл читается корректно ({len(content.split())} слов)\n\n---\n")
                 else:
-                    reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка API**: {str(api_error)}\n\n---\n")
+                    reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка API ({api_error.code})**: {api_error.message}\n\n---\n")
+            except Exception as api_error:
+                reviews.append(f"## 📄 {filepath}\n\n❌ **Неожиданная ошибка**: {str(api_error)}\n\n---\n")
             
         except Exception as e:
             reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка при обработке файла**: {str(e)}\n\n---\n")
@@ -198,13 +199,18 @@ def main():
 """
                 
                 try:
-                    consistency_response = model.generate_content(consistency_prompt)
+                    consistency_response = client.models.generate_content(
+                        model='gemini-2.5-flash',
+                        contents=consistency_prompt
+                    )
                     if consistency_response.text:
                         reviews.insert(0, f"## 🔗 Проверка консистентности между файлами\n\n{consistency_response.text}\n\n---\n")
                     else:
                         reviews.insert(0, f"## 🔗 Проверка консистентности между файлами\n\n⚠️ **Gemini API недоступен для проверки консистентности**\n\nПроверьте вручную:\n- Единообразие терминологии между файлами\n- Отсутствие противоречий в описаниях API\n- Согласованность примеров кода\n\n---\n")
+                except errors.APIError as api_error:
+                    reviews.insert(0, f"## 🔗 Проверка консистентности между файлами\n\n❌ **Ошибка API ({api_error.code})**: {api_error.message}\n\n---\n")
                 except Exception as api_error:
-                    reviews.insert(0, f"## 🔗 Проверка консистентности между файлами\n\n❌ **Ошибка API**: {str(api_error)}\n\n---\n")
+                    reviews.insert(0, f"## 🔗 Проверка консистентности между файлами\n\n❌ **Неожиданная ошибка**: {str(api_error)}\n\n---\n")
         except Exception as e:
             print(f"⚠️  Could not perform consistency check: {e}")
     

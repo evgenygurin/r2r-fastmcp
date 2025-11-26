@@ -11,7 +11,7 @@ denied-tools: Write, Edit
 **Query:** {query}
 
 **Options:**
-- **Max Tokens:** {max_tokens} (default: 8000 tokens for extended responses)
+- **Max Tokens:** {max_tokens} (default: 4000 tokens)
 - **Flags:** --json, --show-sources, --show-metadata, --graph, --collection <id>
 
 ## Instructions
