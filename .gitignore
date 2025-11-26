@@ -58,3 +58,9 @@ logs/
 # OS generated files
 Thumbs.db
 Desktop.ini
+
+# Gemini CLI settings
+.gemini/
+
+# GitHub App credentials
+gha-creds-*.json

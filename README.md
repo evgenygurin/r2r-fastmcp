@@ -4,6 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Language: Russian](https://img.shields.io/badge/Language-Russian-blue.svg)](https://github.com/evgenygurin/r2r-fastmcp)
+[![CI - Documentation](https://github.com/evgenygurin/r2r-fastmcp/workflows/CI%20-%20Documentation/badge.svg)](https://github.com/evgenygurin/r2r-fastmcp/actions)
+[![Gemini Review](https://img.shields.io/badge/Review-Gemini%20AI-blue)](https://github.com/evgenygurin/r2r-fastmcp/actions)
 
 ## 📚 О проекте
 
@@ -183,6 +185,29 @@ docs/claude_code/README.md
 - CLAUDE.md для контекста проекта
 
 Подробнее в [.claude/README.md](.claude/README.md)
+
+---
+
+## 🤖 CI/CD и Автоматизация
+
+Проект использует GitHub Actions для автоматической проверки качества документации:
+
+### CI - Documentation
+Автоматические проверки при каждом push/PR:
+- ✅ Структура документации (наличие всех разделов)
+- ✅ Синтаксис bash скриптов
+- ✅ Naming conventions (NN-name.md)
+- ✅ Отсутствие недопустимых файлов (package.json, .env)
+
+### Gemini AI Documentation Review
+Интеллектуальное ревью документации на PR:
+- 🔍 Соответствие стандартам проекта
+- 📚 Актуальность версий и API
+- 🚫 Отсутствие противоречий
+- ✍️ Грамотность и стиль
+- 🏗️ Структура и навигация
+
+**Подробнее:** [.github/README.md](.github/README.md) | [Настройка Gemini](.github/GEMINI_SETUP.md)
 
 ---
 
