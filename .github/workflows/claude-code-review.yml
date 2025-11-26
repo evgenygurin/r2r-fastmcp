@@ -31,105 +31,27 @@ jobs:
         with:
           fetch-depth: 1
 
-      # Cache bun dependencies
-      - name: Cache bun dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.bun/install/cache
-            node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-
-      # Cache Claude Code installation
-      - name: Cache Claude Code
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/bin/claude
-          key: ${{ runner.os }}-claude-code-2.0.50
-          restore-keys: |
-            ${{ runner.os }}-claude-code-
-
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            **TASK 0: Check Existing Reviews**
-
-            FIRST, use `gh pr view ${{ github.event.pull_request.number }}` to check if there are any review comments from other bots (gemini-code-assist, etc.).
-
-            If other bots left inline comments with suggestions, COLLECT them for TASK 2.
-
-            **TASK 1: Perform Your Own Code Review**
-
-            Review this pull request and identify:
-            - Code quality and best practices violations
+            Please review this pull request and provide feedback on:
+            - Code quality and best practices
             - Potential bugs or issues
             - Performance considerations
             - Security concerns
-            - Missing test coverage
-            - Documentation issues
+            - Test coverage
 
-            Use the repository's CLAUDE.md for guidance on style and conventions.
+            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
-            **TASK 2: Trigger @codegen for Auto-fix**
-
-            CRITICAL: Combine ALL fixable issues (your findings + other bots' suggestions) and you MUST:
-
-            1. Use EXACTLY this command format: `gh pr comment $PR_NUMBER --body "..."`
-               DO NOT use `gh pr review` - it's not in allowed-tools!
-               ONLY use `gh pr comment`!
-
-            2. The comment MUST start with @codegen and provide SPECIFIC, ACTIONABLE instructions
-
-            3. Follow this EXACT format:
-               ```
-               @codegen fix the following issues:
-
-               1. [file.name:line] - [specific problem]
-                  Action required: [exact fix instructions]
-
-               2. [file.name:line] - [specific problem]
-                  Action required: [exact fix instructions]
-
-               Follow CLAUDE.md style guidelines.
-               ```
-
-            4. Example command combining YOUR findings + OTHER BOTS' suggestions:
-               ```bash
-               gh pr comment ${{ github.event.pull_request.number }} --body "@codegen fix the following issues:
-
-               ## From Claude Code Review:
-               1. README.md:85 - Missing space after ## heading
-                  Action required: Add space between ## and heading text
-
-               2. docs/setup.md:42 - Broken link
-                  Action required: Fix path to ./usage.md
-
-               ## From gemini-code-assist suggestions:
-               3. README.md:90-95 - Workflow filenames need backticks
-                  Action required: Wrap all .yml filenames in backticks like \`filename.yml\`
-
-               4. README.md:101 - Link text is not descriptive
-                  Action required: Change link text to 'документацию по интеграции с GitHub'
-
-               Follow CLAUDE.md style guidelines."
-               ```
-
-            5. If NO fixable issues found (neither yours nor from other bots), leave a positive review comment WITHOUT @codegen mention.
-
-            IMPORTANT:
-            - You MUST use the `gh pr comment` tool - do NOT just output text!
-            - ALWAYS check for existing bot comments FIRST (gh pr view)
-            - Combine ALL fixable issues in ONE @codegen command
+            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
           claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+
