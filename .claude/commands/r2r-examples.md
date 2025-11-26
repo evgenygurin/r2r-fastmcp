@@ -1,6 +1,7 @@
 ---
 name: r2r-examples
-description: Interactive R2R examples and tutorials
+description: Interactive R2R examples and tutorials (50+ demonstrations)
+argument-hint: [category]
 allowed-tools: Bash
 denied-tools: Write, Edit
 ---
@@ -9,87 +10,35 @@ denied-tools: Write, Edit
 
 Run interactive examples script with 50+ ready-to-use demonstrations.
 
-## Usage
-
-Category: **$1** (search, rag, agent, docs, collections, graph, workflows, all)
+**Category:** {category} (search, rag, agent, docs, collections, graph, workflows, all)
 
 ## Instructions
 
-Use the interactive examples script `.claude/scripts/examples.sh` to demonstrate R2R functionality.
+Use the interactive examples script to demonstrate R2R functionality:
 
-Execute examples:
 ```bash
-.claude/scripts/examples.sh ${1:-all}
+.claude/scripts/examples.sh {category}
 ```
 
 ## Available Categories
 
-### search
-- Basic search with limits
-- Quiet mode search
-- JSON output
-- Collection-specific search
-- Graph search
-
-### rag
-- Basic RAG queries
-- Extended responses (8K+ tokens)
-- Show sources
-- Collection-specific RAG
-- Quiet mode RAG
-
-### agent
-- Research agent (default)
-- RAG agent mode
-- Extended thinking
-- Continue conversation
-- Show tool calls
-
-### docs
-- List documents
-- Get document details
-- Upload documents
-- Extract knowledge graph
-- Delete documents
-
-### collections
-- List collections
-- Create collections
-- Get collection details
-- Add/remove documents
-
-### graph
-- List entities
-- List relationships
-- List communities
-- Create entities
-- Pull/sync graph
-- Build communities
-
-### workflows
-- Complete upload → extract → search workflow
-- Research session workflow
-- Collection setup workflow
+| Category | Examples |
+|----------|----------|
+| **search** | Basic search, quiet mode, JSON output, collection-specific, graph search |
+| **rag** | Basic RAG, extended responses (8K+ tokens), show sources, collection-specific |
+| **agent** | Research agent, RAG mode, extended thinking, continue conversation, tool calls |
+| **docs** | List, get details, upload, extract knowledge graph, delete documents |
+| **collections** | List, create, get details, add/remove documents |
+| **graph** | Entities, relationships, communities, create entities, pull/sync, build |
+| **workflows** | Upload → extract → search, research session, collection setup |
+| **all** | Run all categories interactively |
 
 ## Features
 
-**Interactive Mode:**
-- Choose which examples to run
-- Step-by-step execution
-- Clear explanations for each example
-- Press Enter to continue
-
-**50+ Examples:**
-- All core commands covered
-- Real-world use cases
-- Best practices demonstrated
-- Common workflows
-
-**Safe Execution:**
-- Asks before running each example
-- Shows command before execution
-- Can skip examples
-- Ctrl+C to exit anytime
+- **Interactive**: Choose which examples to run, step-by-step execution
+- **Comprehensive**: 50+ examples covering all core commands
+- **Educational**: Real-world use cases, best practices demonstrated
+- **Safe**: Asks before running, shows commands, can skip, Ctrl+C to exit
 
 ## Examples
 
@@ -110,10 +59,8 @@ Execute examples:
 /r2r-examples workflows
 ```
 
-## Next Steps
+## Related Commands
 
-After exploring examples:
-- Use `/r2r-workflows` for automated multi-step processes
-- Use `/r2r-quick` for one-line shortcuts
-- Try examples with your own data
-- Customize commands for your workflow
+- `/r2r-workflows` - Automated multi-step processes
+- `/r2r-quick` - One-line shortcuts
+- `/r2r-search`, `/r2r-rag`, `/r2r-agent` - Core operations

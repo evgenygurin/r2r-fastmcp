@@ -1,6 +1,7 @@
 ---
 name: r2r-workflows
-description: Automated R2R workflows for common tasks
+description: Automated R2R workflows for common multi-step tasks
+argument-hint: upload <file> [col_id] | create-collection <name> <desc> <files...> | research <query> [mode] | analyze <doc_id> | batch-upload <dir> [col_id] [pattern]
 allowed-tools: Bash
 denied-tools: Write, Edit
 ---
@@ -9,108 +10,91 @@ denied-tools: Write, Edit
 
 Execute multi-step automated workflows for common R2R operations.
 
-## Usage
-
-Workflow: **$1** (upload, create-collection, research, analyze, batch-upload)
-
-Arguments: **$2**, **$3**, **$4**...
+**Workflow:** {workflow}
+**Arguments:** {args}
 
 ## Instructions
 
-Use the workflows script `.claude/scripts/workflows.sh` to automate complex operations.
+Use the workflows script to automate complex operations:
 
-Execute workflow:
 ```bash
-.claude/scripts/workflows.sh "$1" "${@:2}"
+.claude/scripts/workflows.sh {workflow} {args}
 ```
 
 ## Available Workflows
 
-### upload <file> [collection_id]
-Upload document with automatic processing:
+### 1. upload <file> [collection_id]
+**Steps:**
 1. Validate file exists
 2. Upload to R2R
 3. Wait for processing
 4. Extract knowledge graph
 5. Test searchability
 
-**Example:**
+**Usage:**
 ```bash
 /r2r-workflows upload research-paper.pdf
-/r2r-workflows upload document.pdf abc123-collection-id
+/r2r-workflows upload document.pdf abc123
 ```
 
-### create-collection <name> <description> <files...>
-Create and populate collection:
+### 2. create-collection <name> <description> <files...>
+**Steps:**
 1. Create new collection
 2. Upload all specified files
 3. Extract knowledge graphs
 4. Build community structure
 5. Return collection ID
 
-**Example:**
+**Usage:**
 ```bash
 /r2r-workflows create-collection "Research Papers" "AI research" paper1.pdf paper2.pdf
 ```
 
-### research <query> [mode]
-Interactive research session:
+### 3. research <query> [mode]
+**Steps:**
 1. Start conversation with query
 2. Get conversation ID
 3. Interactive follow-up loop
 4. Enter empty line to exit
 
-**Example:**
+**Usage:**
 ```bash
 /r2r-workflows research "What is RAG?" research
 /r2r-workflows research "Simple question" rag
 ```
 
-### analyze <document_id>
-Comprehensive document analysis:
+### 4. analyze <document_id>
+**Steps:**
 1. Fetch document metadata
 2. Search key topics
 3. Extract knowledge graph
 4. Analyze entities
 5. Generate RAG summary
 
-**Example:**
+**Usage:**
 ```bash
 /r2r-workflows analyze abc123-def456-document-id
 ```
 
-### batch-upload <directory> [collection_id] [pattern]
-Mass upload directory:
+### 5. batch-upload <directory> [collection_id] [pattern]
+**Steps:**
 1. Find matching files
 2. Upload each file
 3. Extract graphs in batch
 4. Show progress and stats
 
-**Example:**
+**Usage:**
 ```bash
 /r2r-workflows batch-upload ./documents
 /r2r-workflows batch-upload ./papers abc123 "*.pdf"
 ```
 
-## Workflow Features
+## Features
 
-**Automation:**
-- Multi-step processes in one command
-- Error handling and validation
-- Progress indicators
-- Success/failure reporting
-
-**Smart Defaults:**
-- Wait times for processing
-- Retry logic
-- Batch operations
-- Clean output
-
-**Safety:**
-- File validation before upload
-- Confirmation prompts for destructive ops
-- Error messages with context
-- Non-zero exit codes on failure
+- **Automation**: Multi-step processes in one command
+- **Error Handling**: Validation, retry logic, clear error messages
+- **Progress**: Indicators for long-running operations
+- **Safety**: File validation, confirmation prompts for destructive ops
 
 ## Examples
 
@@ -125,7 +109,7 @@ Mass upload directory:
 /r2r-workflows research "Explain transformer architecture"
 
 # Analyze uploaded document
-/r2r-workflows analyze <document_id_from_upload>
+/r2r-workflows analyze <document_id>
 
 # Batch upload directory
 /r2r-workflows batch-upload ./research-papers collection123
@@ -133,29 +117,16 @@ Mass upload directory:
 
 ## Tips
 
-**For upload workflow:**
-- File must exist and be accessible
-- Knowledge graph extraction takes ~5 seconds
-- Returns document ID for further use
+**upload**: File must exist, graph extraction ~5s, returns document ID
 
-**For create-collection:**
-- Can pass multiple files as arguments
-- Use glob patterns: `*.pdf`, `papers/*.md`
-- Collection ID saved to `/tmp/.r2r_last_collection`
+**create-collection**: Use glob patterns (`*.pdf`), ID saved to `/tmp/.r2r_last_collection`
 
-**For research:**
-- Use "research" mode for complex queries
-- Use "rag" mode for simple factual questions
-- Conversation ID auto-saved to `/tmp/.r2r_conversation_id`
+**research**: Use "research" mode for complex queries, "rag" for simple factual questions
 
-**For batch-upload:**
-- Processes files in current directory
-- Default pattern: `*.pdf`
-- Shows upload/failure counts
+**batch-upload**: Default pattern `*.pdf`, shows upload/failure counts
 
-## Next Steps
+## Related Commands
 
-- Use `/r2r-quick` for one-line shortcuts
-- Use `/r2r-examples` for interactive learning
+- `/r2r-quick` - One-line shortcuts
+- `/r2r-examples` - Interactive learning
 - Chain workflows: upload → analyze → research
-- Customize workflows for your use case

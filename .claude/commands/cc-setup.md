@@ -2,12 +2,12 @@
 name: cc-setup
 description: Claude Code installation and setup guide
 allowed-tools: Read
-denied-tools: Write, Edit, Bash
+denied-tools: Bash, Write, Edit
 ---
 
 # Claude Code Installation & Setup
 
-Read and explain installation documentation from `docs/claude_code/02-installation-and-setup.md`.
+Comprehensive installation documentation at @docs/claude_code/02-installation-and-setup.md
 
 ## Quick Installation
 

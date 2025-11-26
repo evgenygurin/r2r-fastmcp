@@ -1,39 +1,40 @@
 ---
 name: r2r-search
 description: Search R2R knowledge base with semantic/hybrid search
+argument-hint: <query> [limit] [--verbose|--json|--quiet|--graph]
 allowed-tools: Bash
 denied-tools: Write, Edit
 ---
 
 # R2R Knowledge Base Search
 
-Search query: **$1**
+**Query:** {query}
 
-Options:
-- Limit: **$2** (default: 3 results)
-- Flags: **--verbose** (show full metadata), **--json** (raw JSON output)
+**Options:**
+- **Limit:** {limit} (default: 3 results)
+- **Flags:** --verbose, --json, --quiet, --graph, --collection <id>
 
 ## Instructions
 
-Use the modular R2R CLI `.claude/scripts/r2r` to perform hybrid search (semantic + fulltext).
+Use the modular R2R CLI to perform hybrid search (semantic + fulltext).
 
-Execute the search command:
+Execute search command:
 ```bash
-.claude/scripts/r2r search "$1" --limit ${2:-3}
+.claude/scripts/r2r search "{query}" --limit {limit}
 ```
-
-Additional flags:
-- `--quiet, -q` - Minimal output (one line per result)
-- `--json` - Output raw JSON for further processing
-- `--graph, -g` - Enable graph search
-- `--collection, -c <id>` - Search in specific collection
-- `--filter, -f <key=val>` - Filter results
-- `--strategy, -s <name>` - Search strategy (vanilla, rag_fusion, hyde)
 
 Present results in clear format:
 1. **Score:** X.XX
 2. **Document:** Title [chunk_id]
 3. **Text excerpt**
+
+Available flags:
+- `--quiet, -q` - Minimal output (one line per result)
+- `--json` - Raw JSON output
+- `--verbose, -v` - Full metadata
+- `--graph, -g` - Enable graph search
+- `--collection, -c <id>` - Filter by collection
+- `--filter, -f <key=val>` - Custom filters
 
 If no query provided, prompt user for a search query.
 
@@ -46,9 +47,12 @@ If no query provided, prompt user for a search query.
 # With custom limit
 /r2r-search "neural networks" 10
 
-# Verbose output with metadata
+# Verbose output
 /r2r-search "transformer architecture" 5 --verbose
 
-# JSON output for processing
-/r2r-search "deep learning" --json
+# JSON output
+/r2r-search "deep learning" 3 --json
+
+# Collection-specific search
+/r2r-search "RAG systems" 5 --collection abc123
 ```

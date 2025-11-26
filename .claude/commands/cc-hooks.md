@@ -1,13 +1,13 @@
 ---
 name: cc-hooks
 description: Claude Code hooks and lifecycle automation
-allowed-tools: Read, Glob
-denied-tools: Write, Edit, Bash
+allowed-tools: Read
+denied-tools: Bash, Write, Edit
 ---
 
 # Claude Code Hooks Guide
 
-Read and explain hooks documentation from `docs/claude_code/05-hooks-and-customization.md`.
+Comprehensive hooks documentation at @docs/claude_code/05-hooks-and-customization.md
 
 ## What are Hooks?
 

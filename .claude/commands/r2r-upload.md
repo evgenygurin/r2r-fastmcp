@@ -1,55 +1,56 @@
 ---
 name: r2r-upload
 description: Upload document to R2R knowledge base
+argument-hint: <file_path> [collection_ids] [--title|--mode|--json]
 allowed-tools: Bash, Read, Glob
 denied-tools: Write, Edit
 ---
 
 # Upload Document to R2R
 
-File path: **$1**
+**File Path:** {file_path}
 
-Options:
-- Collection IDs: **$2** (optional, comma-separated collection IDs)
-- Metadata: **$3** (optional, JSON string)
+**Options:**
+- **Collection IDs:** {collection_ids} (optional, comma-separated)
+- **Flags:** --title, --mode (hi-res/fast), --json, --quiet
 
 ## Instructions
 
-Use the modular R2R CLI `.claude/scripts/r2r` to upload a document.
+⚠️ **IMPORTANT:** This is a potentially destructive operation. Confirm with user before uploading.
 
-**IMPORTANT:** This command is potentially destructive. Confirm with user before uploading.
+If file not provided, list available files using Glob:
+```bash
+# List uploadable documents in current directory
+```
 
 Execute upload command:
 ```bash
-.claude/scripts/r2r docs upload "$1" ${2:+--collections "$2"}
+.claude/scripts/r2r docs upload "{file_path}" ${collection_ids:+--collections "{collection_ids}"}
 ```
 
-Supported file types:
-- PDF (.pdf)
-- Markdown (.md)
-- Text (.txt)
-- Word (.docx)
-- HTML (.html)
-- JSON (.json)
-- CSV (.csv)
+### Supported File Types
 
-Additional flags:
+- PDF (.pdf), Markdown (.md), Text (.txt)
+- Word (.docx), HTML (.html)
+- JSON (.json), CSV (.csv)
+
+### Available Flags
+
 - `--collections, -c <ids>` - Comma-separated collection IDs
 - `--title, -t <title>` - Document title
 - `--mode, -m <mode>` - Ingestion mode (hi-res/fast, default: hi-res)
 - `--quiet, -q` - Minimal output
 - `--json` - Raw JSON output
 
-After successful upload:
+### After Upload
+
 1. Extract `document_id` from response
-2. Confirm successful upload with status
+2. Confirm successful upload
 3. Suggest next steps:
    - Extract knowledge graph: `.claude/scripts/r2r docs extract <document_id>`
-   - Search the document content
+   - Search document content
    - Add to more collections
-   - Build knowledge graph communities
-
-If file path not provided, list available documents in current directory using Glob.
+   - Build communities
 
 ## Examples
 
@@ -60,12 +61,14 @@ If file path not provided, list available documents in current directory using G
 # Upload to specific collections
 /r2r-upload ./paper.pdf "col1,col2,col3"
 
-# Upload with metadata
-/r2r-upload ./document.md "" '{"category": "research", "year": 2024, "author": "John Doe"}'
+# Fast mode upload
+/r2r-upload ./document.md "" --mode fast
 
-# Upload and extract knowledge graph
-/r2r-upload ./technical-doc.pdf "collection_id"
-# Then run: .claude/scripts/r2r_advanced.sh docs extract <returned_document_id>
+# With custom title
+/r2r-upload ./paper.pdf "collection_id" --title "Research Paper 2024"
+
+# JSON output
+/r2r-upload ./doc.pdf "" --json
 ```
 
 ## Security Notes
@@ -73,8 +76,11 @@ If file path not provided, list available documents in current directory using G
 - File must exist and be accessible
 - Upload requires appropriate permissions
 - Large files may take time to process
-- R2R will automatically:
-  - Chunk the document
-  - Generate embeddings
-  - Index for search
-  - Extract entities (if requested)
+
+### Automatic Processing
+
+R2R will automatically:
+- Chunk the document
+- Generate embeddings
+- Index for search
+- Extract entities (if requested)

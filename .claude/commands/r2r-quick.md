@@ -1,6 +1,7 @@
 ---
 name: r2r-quick
 description: Quick one-line R2R tasks and shortcuts
+argument-hint: ask <query> | status | up <file> [col_id] | col <name> [desc] | col-search <query> | continue <msg> | graph <col_id> | batch [pattern] | find <term> | cleanup
 allowed-tools: Bash
 denied-tools: Write, Edit
 ---
@@ -9,178 +10,74 @@ denied-tools: Write, Edit
 
 One-line shortcuts for the most common R2R operations.
 
-## Usage
-
-Task: **$1** (ask, status, up, col, col-search, continue, graph, batch, find, cleanup)
-
-Arguments: **$2**, **$3**...
+**Task:** {task}
+**Arguments:** {args}
 
 ## Instructions
 
-Use the quick tasks script `.claude/scripts/quick.sh` for instant operations.
+Use the quick tasks script for instant operations:
 
-Execute quick task:
 ```bash
-.claude/scripts/quick.sh "$1" "${@:2}"
+.claude/scripts/quick.sh {task} {args}
 ```
 
 ## Available Tasks
 
-### ask <query>
-Quick search + RAG answer in one command:
-- Searches knowledge base (3 results)
-- Generates comprehensive answer
-- Shows both search results and RAG response
+| Task | Description | Usage |
+|------|-------------|-------|
+| `ask <query>` | Search + RAG answer | `ask "What is RAG?"` |
+| `status` | System status | `status` |
+| `up <file> [col]` | Upload + extract | `up paper.pdf` |
+| `col <name> [desc]` | Create collection | `col "Research"` |
+| `col-search <q>` | Search last collection | `col-search "transformers"` |
+| `continue <msg>` | Continue conversation | `continue "Tell more"` |
+| `graph <col_id>` | Graph overview | `graph <id>` |
+| `batch [pattern]` | Batch upload | `batch "*.pdf"` |
+| `find <term>` | Find by title | `find "machine"` |
+| `cleanup` | Delete failed docs | `cleanup` |
 
-**Example:**
-```bash
-/r2r-quick ask "What is RAG?"
-/r2r-quick ask "Explain transformers"
-```
+### Task Details
 
-### status
-Show R2R system status:
-- Total documents count
-- List collections (5 recent)
-- Recent uploads (5 documents)
+**ask**: Searches knowledge base (3 results) + generates comprehensive RAG answer
 
-**Example:**
-```bash
-/r2r-quick status
-```
+**status**: Shows total documents, recent collections (5), recent uploads (5)
 
-### up <file> [collection_id]
-Quick upload with auto-extract:
-- Uploads document
-- Waits for processing (3 seconds)
-- Extracts knowledge graph
-- Returns document ID
-- Shows search command hint
+**up**: Uploads document, waits for processing (3s), extracts knowledge graph, returns document ID
 
-**Example:**
-```bash
-/r2r-quick up paper.pdf
-/r2r-quick up document.pdf abc123-collection-id
-```
+**col**: Creates collection, returns ID, saves to `/tmp/.r2r_last_collection`
 
-### col <name> [description]
-Quick create collection:
-- Creates new collection
-- Returns collection ID
-- Saves to `/tmp/.r2r_last_collection`
-- Shows usage hints
+**col-search**: Uses collection ID from `/tmp/.r2r_last_collection`, returns 5 results
 
-**Example:**
-```bash
-/r2r-quick col "Research Papers"
-/r2r-quick col "AI Research" "Machine learning papers"
-```
+**continue**: Uses conversation ID from `/tmp/.r2r_conversation_id`, maintains context
 
-### col-search <query>
-Search in last created collection:
-- Uses collection ID from `/tmp/.r2r_last_collection`
-- Returns 5 results
-- Faster than full corpus search
+**graph**: Lists entities (10), relationships (10), communities (5) in compact format
 
-**Example:**
-```bash
-/r2r-quick col-search "transformers"
-```
+**batch**: Finds matching files (default: `*.pdf`), asks confirmation, uploads with progress
 
-### continue <message>
-Continue last agent conversation:
-- Uses conversation ID from `/tmp/.r2r_conversation_id`
-- Maintains context across turns
-- Auto-starts new conversation if none exists
+**find**: Searches document titles (case-insensitive), returns up to 50 matches
 
-**Example:**
-```bash
-/r2r-quick continue "Tell me more"
-/r2r-quick continue "Give me examples"
-```
+**cleanup**: Finds documents with `ingestion_status: failed`, asks confirmation, deletes
 
-### graph <collection_id>
-Quick knowledge graph overview:
-- Lists entities (10)
-- Lists relationships (10)
-- Lists communities (5)
-- Compact one-line format
+## Features
 
-**Example:**
-```bash
-/r2r-quick graph abc123-def456-collection-id
-```
+- **Speed**: One command, multiple operations, minimal output
+- **Smart Defaults**: Auto-saves IDs, reuses last collection/conversation
+- **User-Friendly**: Clear confirmations, helpful hints, progress indicators
 
-### batch [pattern]
-Batch upload current directory:
-- Finds matching files (default: `*.pdf`)
-- Asks for confirmation
-- Uploads all files
-- Shows progress and stats
-
-**Example:**
-```bash
-/r2r-quick batch
-/r2r-quick batch "*.md"
-/r2r-quick batch "papers/*.pdf"
-```
-
-### find <search_term>
-Find documents by title:
-- Searches document titles (case-insensitive)
-- Shows document ID, title, status
-- Returns up to 50 matches
-
-**Example:**
-```bash
-/r2r-quick find "machine learning"
-/r2r-quick find "research"
-```
-
-### cleanup
-Delete failed documents:
-- Finds all documents with `ingestion_status: failed`
-- Shows count
-- Asks for confirmation
-- Deletes failed documents
-
-**Example:**
-```bash
-/r2r-quick cleanup
-```
-
-## Quick Task Features
-
-**Speed:**
-- One command, multiple operations
-- Minimal output by default
-- No configuration needed
-
-**Smart Defaults:**
-- Auto-saves important IDs
-- Reuses last collection/conversation
-- Reasonable limits and waits
-
-**User-Friendly:**
-- Clear confirmations for destructive ops
-- Helpful hints after operations
-- Progress indicators
-- Error messages with context
-
-## Common Workflows
+## Workflows
 
 **Quick Q&A:**
 ```bash
 /r2r-quick ask "What is DeepSeek R1?"
 ```
 
-**Upload and Search:**
+**Upload → Search:**
 ```bash
 /r2r-quick up paper.pdf
 /r2r-quick ask "key concepts from paper"
 ```
 
-**Collection Workflow:**
+**Collection Setup:**
 ```bash
 /r2r-quick col "Research"
 /r2r-quick up paper1.pdf
@@ -191,7 +88,7 @@ Delete failed documents:
 **Conversation:**
 ```bash
 /r2r-quick ask "Explain RAG systems"
-/r2r-quick continue "Show me examples"
+/r2r-quick continue "Show examples"
 /r2r-quick continue "Compare approaches"
 ```
 
@@ -205,50 +102,31 @@ Delete failed documents:
 ## Examples
 
 ```bash
-# Search + answer
 /r2r-quick ask "What is R2R?"
-
-# Check status
 /r2r-quick status
-
-# Upload document
 /r2r-quick up research.pdf
-
-# Create collection
 /r2r-quick col "ML Papers"
-
-# Continue conversation
-/r2r-quick continue "Elaborate on that"
-
-# Batch upload
+/r2r-quick continue "Elaborate"
 /r2r-quick batch "*.pdf"
-
-# Find documents
 /r2r-quick find "transformer"
-
-# Cleanup failed
 /r2r-quick cleanup
 ```
 
 ## Aliases
 
-If you source `.claude/scripts/aliases.sh`:
+Source `.claude/scripts/aliases.sh` for ultra-short commands:
 
 ```bash
-# Ultra-short form
-rq ask "query"           # /r2r-quick ask
-rq up file.pdf           # /r2r-quick up
-rq status                # /r2r-quick status
-
-# Helper functions
-r2r-ask "query"          # Quick ask
-r2r-up file.pdf          # Quick upload
-r2r-cont "message"       # Continue conversation
+rq ask "query"       # /r2r-quick ask
+rq up file.pdf       # /r2r-quick up
+rq status            # /r2r-quick status
+r2r-ask "query"      # Quick ask
+r2r-up file.pdf      # Quick upload
+r2r-cont "message"   # Continue conversation
 ```
 
-## Next Steps
+## Related Commands
 
-- Use `/r2r-workflows` for multi-step automation
-- Use `/r2r-examples` for learning
-- Combine quick tasks in shell scripts
-- Source `aliases.sh` for even faster access
+- `/r2r-workflows` - Multi-step automation
+- `/r2r-examples` - Interactive learning
+- `/r2r-search`, `/r2r-rag`, `/r2r-agent` - Core operations
