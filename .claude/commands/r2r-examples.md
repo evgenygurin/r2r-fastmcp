@@ -1,8 +1,8 @@
 ---
 name: r2r-examples
-description: Interactive R2R examples and tutorials
+argument-hint: "[category]"
+description: Interactive R2R examples (search/rag/agent/docs/collections/graph)
 allowed-tools: Bash
-denied-tools: Write, Edit
 ---
 
 # R2R Interactive Examples

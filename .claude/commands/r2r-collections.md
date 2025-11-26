@@ -1,8 +1,8 @@
 ---
 name: r2r-collections
-description: List and manage R2R collections
+argument-hint: "[action]"
+description: Manage R2R collections - list, create, delete, add/remove documents
 allowed-tools: Bash
-denied-tools: Write, Edit
 ---
 
 # R2R Collections Management

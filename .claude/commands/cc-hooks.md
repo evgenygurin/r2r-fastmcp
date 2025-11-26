@@ -2,7 +2,7 @@
 name: cc-hooks
 description: Claude Code hooks and lifecycle automation
 allowed-tools: Read, Glob
-denied-tools: Write, Edit, Bash
+model: claude-3-5-haiku-20241022
 ---
 
 # Claude Code Hooks Guide

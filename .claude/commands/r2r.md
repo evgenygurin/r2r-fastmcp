@@ -1,8 +1,8 @@
 ---
 name: r2r
-description: Show R2R quick reference
+argument-hint: "<command> [args...]"
+description: Main R2R CLI interface (search/rag/agent/docs/collections/conversation/graph/analytics)
 allowed-tools: Read
-denied-tools: Write, Edit, Bash
 ---
 
 # R2R Quick Reference

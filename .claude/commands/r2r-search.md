@@ -1,8 +1,8 @@
 ---
 name: r2r-search
+argument-hint: "<query> [limit]"
 description: Search R2R knowledge base with semantic/hybrid search
 allowed-tools: Bash
-denied-tools: Write, Edit
 ---
 
 # R2R Knowledge Base Search

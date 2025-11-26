@@ -1,8 +1,8 @@
 ---
 name: r2r-workflows
-description: Automated R2R workflows for common tasks
+argument-hint: "<workflow> [args...]"
+description: Automated R2R workflows (upload/create-collection/research/analyze/batch-upload)
 allowed-tools: Bash
-denied-tools: Write, Edit
 ---
 
 # R2R Automated Workflows

@@ -2,7 +2,7 @@
 name: cc-subagents
 description: Claude Code subagents and parallel execution
 allowed-tools: Read
-denied-tools: Write, Edit, Bash
+model: claude-3-5-haiku-20241022
 ---
 
 # Subagents Guide
