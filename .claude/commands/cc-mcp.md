@@ -2,12 +2,12 @@
 name: cc-mcp
 description: Model Context Protocol (MCP) integration guide
 allowed-tools: Read
-denied-tools: Write, Edit, Bash
+denied-tools: Bash, Write, Edit
 ---
 
 # MCP Integration Guide
 
-Read and explain MCP integration from `docs/claude_code/07-mcp-integration.md`.
+Comprehensive MCP integration documentation at @docs/claude_code/07-mcp-integration.md
 
 ## What is MCP?
 

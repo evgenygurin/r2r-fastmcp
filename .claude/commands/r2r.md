@@ -1,29 +1,37 @@
 ---
 name: r2r
-description: Show R2R quick reference
+description: Show R2R quick reference with modular CLI commands
 allowed-tools: Read
-denied-tools: Write, Edit, Bash
+denied-tools: Bash, Write, Edit
 ---
 
 # R2R Quick Reference
 
-Show R2R quick reference with modular CLI commands.
+Comprehensive reference for R2R modular CLI commands.
+
+For complete documentation, see @.claude/scripts/README.md
 
 ## Modular R2R CLI
 
-**`.claude/scripts/r2r`** - Unified command interface (8 commands, 48 sub-commands)
+Unified command interface: `.claude/scripts/r2r`
 
-### Core Commands (3):
+**8 commands, 48 sub-commands**
+
+### Core Commands (3)
+
 - `search <query> [--limit N]` - Hybrid search (semantic + fulltext)
-- `rag <query> [--max-tokens N]` - RAG query with generation
+- `rag <query> [--max-tokens N]` - RAG query with generation  
 - `agent <query> [--mode research|rag]` - Multi-turn agent
 
-### Management Commands (5):
-- `docs` - Document management (14 sub-commands: list, get, upload, delete, extract, etc.)
-- `collections` - Collection management (6 sub-commands: list, create, add-doc, remove-doc, etc.)
-- `conversation` - Conversation management (5 sub-commands: list, create, get, add-message, delete)
-- `graph` - Knowledge graph operations (20 sub-commands: entities, relationships, communities, etc.)
-- `analytics` - System analytics (3 sub-commands: system, collection, document)
+### Management Commands (5)
+
+- `docs` - Document management (14 sub-commands)
+- `collections` - Collection management (6 sub-commands)
+- `conversation` - Conversation management (5 sub-commands)
+- `graph` - Knowledge graph operations (20 sub-commands)
+- `analytics` - System analytics (3 sub-commands)
+
+For details, see @.claude/scripts/commands/
 
 ## Slash Commands
 
@@ -39,32 +47,30 @@ Show R2R quick reference with modular CLI commands.
 - `/r2r-workflows <workflow> [args]` - Automated workflows (upload, create-collection, research, etc.)
 - `/r2r-examples [category]` - Interactive examples (50+ demos)
 
-## Common Flags (GNU-style)
+## Common Flags
 
-**Output modes:**
-- `--quiet, -q` - Minimal output (one line per result)
+**Output:**
+- `--quiet, -q` - Minimal output
 - `--json` - Raw JSON output
-- `--verbose, -v` - Full details with metadata
+- `--verbose, -v` - Full metadata
 
-**Search/RAG options:**
-- `--limit, -l <n>` - Number of results (default: 3)
-- `--max-tokens, -t <n>` - Max tokens for generation (default: 4000)
+**Search/RAG:**
+- `--limit, -l <n>` - Results count (default: 3)
+- `--max-tokens, -t <n>` - Max tokens (default: 4000)
 - `--graph, -g` - Enable graph search
 - `--collection, -c <id>` - Filter by collection
-- `--filter, -f <key=val>` - Custom filters
 
-**Agent options:**
+**Agent:**
 - `--mode, -m <mode>` - research (default) or rag
 - `--conversation, -c <id>` - Continue conversation
-- `--thinking` - Extended thinking (4096 token budget)
+- `--thinking` - Extended thinking (4096 tokens)
 - `--show-tools` - Show tool calls
-- `--show-sources` - Show citations
 
-## Quick Examples
+## Examples
 
 ```bash
 # Core commands
-r2r search "transformers" --limit 5 -q
+r2r search "transformers" --limit 5
 r2r rag "What is RAG?" --show-sources
 r2r agent "Explain DeepSeek" --thinking
 
@@ -72,50 +78,38 @@ r2r agent "Explain DeepSeek" --thinking
 r2r docs list -l 10 -q
 r2r collections create -n "Research Papers"
 r2r graph entities <collection_id> -l 50
-
-# Advanced
-r2r search "AI" --graph --collection abc123
-r2r rag "Question" --filter category=research --max-tokens 8000
-r2r agent "Continue discussion" -c <conv_id> --show-tools
 ```
 
 ## Helper Scripts
 
-**Quick Tasks** (`.claude/scripts/quick.sh`):
-- `ask "query"` - Search + RAG answer in one command
-- `status` - Show R2R system status
-- `up <file>` - Quick upload with auto-extract
-- `col "name"` - Create collection
-- `continue "msg"` - Continue last conversation
-- `batch [pattern]` - Batch upload directory
-- `cleanup` - Delete failed documents
+For details, see @.claude/scripts/
 
-**Workflows** (`.claude/scripts/workflows.sh`):
-- `upload <file>` - Upload + extract + verify
-- `create-collection <name> <desc> <files...>` - Full collection setup
-- `research <query>` - Interactive research session
-- `analyze <doc_id>` - Comprehensive document analysis
-- `batch-upload <dir>` - Mass upload with progress
+**Quick Tasks** (`quick.sh`): ask, status, up, col, continue, batch, find, cleanup
 
-**Examples** (`.claude/scripts/examples.sh`):
-- `search`, `rag`, `agent` - Category-specific examples
-- `docs`, `collections`, `graph` - Management examples
-- `workflows` - Complete workflow demonstrations
-- Interactive mode with step-by-step execution
+**Workflows** (`workflows.sh`): upload, create-collection, research, analyze, batch-upload
 
-**Aliases** (`.claude/scripts/aliases.sh`):
+**Examples** (`examples.sh`): Interactive demos by category (50+ examples)
+
+**Aliases** (`aliases.sh`):
 ```bash
 source .claude/scripts/aliases.sh
-rs "query"        # r2r search
-rr "question"     # r2r rag
-ra "message"      # r2r agent
-rq ask "query"    # quick.sh ask
-rw upload file    # workflows.sh upload
+rs "query"      # r2r search
+rr "question"   # r2r rag  
+ra "message"    # r2r agent
 ```
+
+## Related Commands
+
+- `/r2r-search` - Quick search
+- `/r2r-rag` - RAG query
+- `/r2r-agent` - Agent conversation
+- `/r2r-collections` - Manage collections
+- `/r2r-upload` - Upload documents
+- `/r2r-quick` - One-line shortcuts
+- `/r2r-workflows` - Automated workflows
+- `/r2r-examples` - Interactive examples
 
 ## Documentation
 
-- **Full reference:** `.claude/scripts/README.md`
-- **Helper scripts:** Use `/r2r-quick`, `/r2r-workflows`, `/r2r-examples` commands
-- **CLI help:** `r2r <command> help`
-- **All commands:** `r2r search help`, `r2r rag help`, `r2r agent help`, etc.
+- Full reference: @.claude/scripts/README.md
+- CLI help: `r2r <command> help`

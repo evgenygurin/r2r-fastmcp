@@ -1,13 +1,13 @@
 ---
 name: cc-commands
 description: Claude Code custom slash commands guide
-allowed-tools: Read, Glob
-denied-tools: Write, Edit, Bash
+allowed-tools: Read
+denied-tools: Bash, Write, Edit
 ---
 
 # Claude Code Custom Commands Guide
 
-Read and explain custom slash commands documentation from `docs/claude_code/04-commands-and-usage.md`.
+Comprehensive slash commands documentation at @docs/claude_code/04-commands-and-usage.md
 
 ## What are Slash Commands?
 
