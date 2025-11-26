@@ -27,11 +27,17 @@ Show R2R quick reference with modular CLI commands.
 
 ## Slash Commands
 
+**Core Operations:**
 - `/r2r-search "query" [limit]` - Quick search
 - `/r2r-rag "query" [max_tokens]` - RAG query
 - `/r2r-agent "message" [mode]` - Agent conversation
 - `/r2r-collections [action]` - Manage collections
 - `/r2r-upload <file> [collection_ids]` - Upload document
+
+**Helper Scripts:**
+- `/r2r-quick <task> [args]` - One-line shortcuts (ask, status, up, col, continue, etc.)
+- `/r2r-workflows <workflow> [args]` - Automated workflows (upload, create-collection, research, etc.)
+- `/r2r-examples [category]` - Interactive examples (50+ demos)
 
 ## Common Flags (GNU-style)
 
@@ -73,8 +79,43 @@ r2r rag "Question" --filter category=research --max-tokens 8000
 r2r agent "Continue discussion" -c <conv_id> --show-tools
 ```
 
+## Helper Scripts
+
+**Quick Tasks** (`.claude/scripts/quick.sh`):
+- `ask "query"` - Search + RAG answer in one command
+- `status` - Show R2R system status
+- `up <file>` - Quick upload with auto-extract
+- `col "name"` - Create collection
+- `continue "msg"` - Continue last conversation
+- `batch [pattern]` - Batch upload directory
+- `cleanup` - Delete failed documents
+
+**Workflows** (`.claude/scripts/workflows.sh`):
+- `upload <file>` - Upload + extract + verify
+- `create-collection <name> <desc> <files...>` - Full collection setup
+- `research <query>` - Interactive research session
+- `analyze <doc_id>` - Comprehensive document analysis
+- `batch-upload <dir>` - Mass upload with progress
+
+**Examples** (`.claude/scripts/examples.sh`):
+- `search`, `rag`, `agent` - Category-specific examples
+- `docs`, `collections`, `graph` - Management examples
+- `workflows` - Complete workflow demonstrations
+- Interactive mode with step-by-step execution
+
+**Aliases** (`.claude/scripts/aliases.sh`):
+```bash
+source .claude/scripts/aliases.sh
+rs "query"        # r2r search
+rr "question"     # r2r rag
+ra "message"      # r2r agent
+rq ask "query"    # quick.sh ask
+rw upload file    # workflows.sh upload
+```
+
 ## Documentation
 
 - **Full reference:** `.claude/scripts/README.md`
+- **Helper scripts:** Use `/r2r-quick`, `/r2r-workflows`, `/r2r-examples` commands
 - **CLI help:** `r2r <command> help`
 - **All commands:** `r2r search help`, `r2r rag help`, `r2r agent help`, etc.
