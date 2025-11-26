@@ -1,8 +1,8 @@
 ---
 name: r2r-quick
-description: Quick one-line R2R tasks and shortcuts
+argument-hint: "<task> [args...]"
+description: Quick R2R shortcuts (ask/status/up/col/continue/graph/batch/find/cleanup)
 allowed-tools: Bash
-denied-tools: Write, Edit
 ---
 
 # R2R Quick Tasks

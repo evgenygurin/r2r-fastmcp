@@ -1,8 +1,8 @@
 ---
 name: r2r-agent
-description: Multi-turn conversation with R2R agent
+argument-hint: "<message> [mode] [conversation_id] [max_tokens]"
+description: Multi-turn conversation with R2R agent (rag/research modes)
 allowed-tools: Bash
-denied-tools: Write, Edit
 ---
 
 # R2R Agent Conversation

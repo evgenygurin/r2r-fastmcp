@@ -2,7 +2,7 @@
 name: cc-mcp
 description: Model Context Protocol (MCP) integration guide
 allowed-tools: Read
-denied-tools: Write, Edit, Bash
+model: claude-3-5-haiku-20241022
 ---
 
 # MCP Integration Guide

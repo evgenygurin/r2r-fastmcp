@@ -2,7 +2,7 @@
 name: cc-commands
 description: Claude Code custom slash commands guide
 allowed-tools: Read, Glob
-denied-tools: Write, Edit, Bash
+model: claude-3-5-haiku-20241022
 ---
 
 # Claude Code Custom Commands Guide
@@ -48,7 +48,7 @@ Format:
 name: command-name
 description: Brief description
 allowed-tools: Bash, Read, Glob
-denied-tools: Write, Edit
+model: claude-3-5-haiku-20241022
 ---
 
 # Command Title
@@ -97,6 +97,7 @@ Read docs/claude_code/04-commands-and-usage.md
 name: review
 description: Review code for quality and best practices
 allowed-tools: Read, Grep, Glob
+model: claude-3-5-haiku-20241022
 ---
 
 # Code Review
@@ -116,6 +117,7 @@ File/directory: **$1**
 name: component
 description: Generate React component with tests
 allowed-tools: Write, Bash
+model: claude-3-5-haiku-20241022
 ---
 
 # Component Generator

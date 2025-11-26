@@ -2,7 +2,7 @@
 name: cc-setup
 description: Claude Code installation and setup guide
 allowed-tools: Read
-denied-tools: Write, Edit, Bash
+model: claude-3-5-haiku-20241022
 ---
 
 # Claude Code Installation & Setup

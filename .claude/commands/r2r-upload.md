@@ -1,8 +1,8 @@
 ---
 name: r2r-upload
-description: Upload document to R2R knowledge base
+argument-hint: "<file> [collection_id]"
+description: Upload document to R2R with automatic processing
 allowed-tools: Bash, Read, Glob
-denied-tools: Write, Edit
 ---
 
 # Upload Document to R2R

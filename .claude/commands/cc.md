@@ -1,8 +1,8 @@
 ---
 name: cc
-description: Claude Code quick reference
+description: Claude Code documentation quick reference with navigation links and core capabilities overview
 allowed-tools: Read
-denied-tools: Write, Edit, Bash
+model: claude-3-5-haiku-20241022
 ---
 
 # Claude Code Quick Reference

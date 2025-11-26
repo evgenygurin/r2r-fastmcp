@@ -1,8 +1,8 @@
 ---
 name: r2r-rag
+argument-hint: "<question> [max_tokens]"
 description: RAG query to R2R with answer generation
 allowed-tools: Bash
-denied-tools: Write, Edit
 ---
 
 # R2R RAG Query

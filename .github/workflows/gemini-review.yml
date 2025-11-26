@@ -1,0 +1,279 @@
+name: Gemini Documentation Review
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'docs/**/*.md'
+      - '.claude/**/*.md'
+      - 'CLAUDE.md'
+      - 'README.md'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review-docs:
+    name: Review Documentation Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get changed markdown files
+        id: changed-files
+        run: |
+          # Get list of changed .md files
+          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.md$' > changed_files.txt || true
+          
+          if [ -s changed_files.txt ]; then
+            echo "📝 Changed documentation files: $(wc -l < changed_files.txt)"
+            cat changed_files.txt
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No markdown files changed"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Setup Python
+        if: steps.changed-files.outputs.has_changes == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          pip install google-generativeai requests
+      
+      - name: Create review script
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          cat > review_script.py << 'EOF'
+          import os
+          import sys
+          import google.generativeai as genai
+          
+          api_key = os.environ.get('GEMINI_API_KEY')
+          if not api_key:
+              print("❌ GEMINI_API_KEY secret not configured")
+              print("📝 Please add a valid Google AI Studio API key as a repository secret")
+              print("🔗 Get your API key at: https://aistudio.google.com/app/apikey")
+              print("⚠️  Continuing without Gemini review...")
+              
+              # Write a fallback review file instead of exiting
+              with open('review_output.md', 'w', encoding='utf-8') as f:
+                  f.write("# 🤖 Gemini Documentation Review\n\n")
+                  f.write("⚠️  **Configuration Missing**: GEMINI_API_KEY secret not configured\n\n")
+                  f.write("**Solution**: Add a Google AI Studio API key as a repository secret named `GEMINI_API_KEY`\n")
+                  f.write("🔗 Get your API key at: https://aistudio.google.com/app/apikey\n\n")
+                  f.write("*Review skipped due to missing configuration*\n")
+              
+              print("✅ Fallback review file created")
+              sys.exit(0)
+          
+          # Configure Gemini API (AI Studio, not Vertex AI)
+          try:
+              genai.configure(api_key=api_key)
+              model = genai.GenerativeModel('gemini-1.5-flash')
+              
+              # Test the configuration with a minimal call
+              print("🔧 Testing Gemini API connection...")
+              test_response = model.generate_content("Hello")
+              print("✅ Gemini API connection successful")
+              
+          except Exception as e:
+              error_msg = str(e)
+              print(f"❌ Failed to configure Gemini API: {error_msg}")
+              
+              if "API keys are not supported" in error_msg:
+                  print("💡 The API key appears to be for Vertex AI, not AI Studio")
+                  print("📝 Please use a Google AI Studio API key instead")
+                  print("🔗 Get your API key at: https://aistudio.google.com/app/apikey")
+              elif "CREDENTIALS_MISSING" in error_msg:
+                  print("💡 Authentication credentials are missing or invalid")
+                  print("📝 Please check your GEMINI_API_KEY secret configuration")
+              
+              print("⚠️  Continuing without Gemini review due to API configuration issues...")
+              
+              # Write a fallback review file instead of exiting
+              with open('review_output.md', 'w', encoding='utf-8') as f:
+                  f.write("# 🤖 Gemini Documentation Review\n\n")
+                  f.write("⚠️  **API Configuration Issue**: Gemini API not available\n\n")
+                  f.write(f"**Error**: {error_msg}\n\n")
+                  f.write("**Solution**: Configure a valid Google AI Studio API key in repository secrets\n")
+                  f.write("🔗 Get your API key at: https://aistudio.google.com/app/apikey\n\n")
+                  f.write("*Review skipped due to configuration issues*\n")
+              
+              print("✅ Fallback review file created")
+              sys.exit(0)
+          
+          # Read project context from CLAUDE.md
+          project_context = ""
+          try:
+              with open('CLAUDE.md', 'r', encoding='utf-8') as f:
+                  content = f.read()
+                  # Extract project overview
+                  if '## 🎯 Обзор проекта' in content:
+                      start = content.find('## 🎯 Обзор проекта')
+                      end = content.find('## 📁 Структура проекта')
+                      if end > start:
+                          project_context = content[start:end]
+                  
+                  # Add style guidelines
+                  if '## ✅ Обязательные практики' in content:
+                      start = content.find('## ✅ Обязательные практики')
+                      end = content.find('##', start + 10)
+                      if end > start:
+                          project_context += "\n\n" + content[start:end if end != -1 else len(content)]
+          except Exception as e:
+              print(f"⚠️  Could not read CLAUDE.md: {e}")
+          
+          # Read changed files
+          with open('changed_files.txt', 'r') as f:
+              changed_files = [line.strip() for line in f if line.strip()]
+          
+          if not changed_files:
+              print("✅ No documentation files to review")
+              sys.exit(0)
+          
+          print(f"📝 Reviewing {len(changed_files)} files...")
+          
+          reviews = []
+          
+          for filepath in changed_files:
+              try:
+                  with open(filepath, 'r', encoding='utf-8') as f:
+                      content = f.read()
+                  
+                  # Determine file category
+                  file_category = "general"
+                  if "/r2r/" in filepath:
+                      file_category = "R2R v3 documentation"
+                  elif "/fastmcp/" in filepath:
+                      file_category = "FastMCP 2.x documentation"
+                  elif "/claude_code/" in filepath:
+                      file_category = "Claude Code 1.0.58+ documentation"
+                  elif "/.claude/" in filepath:
+                      file_category = "R2R integration (commands/skills/agents)"
+                  
+                  # Build prompt safely
+                  prompt_lines = [
+                      "Вы - технический рецензент русскоязычной документации для AI-проектов.",
+                      "",
+                      "КОНТЕКСТ ПРОЕКТА:",
+                      project_context or "Документация-only репозиторий для R2R v3, FastMCP 2.x, Claude Code 1.0.58+",
+                      "",
+                      "ВАЖНО: Это документация-only репозиторий. Никакого кода для компиляции/тестирования.",
+                      "",
+                      f"Файл: {filepath}",
+                      f"Категория: {file_category}",
+                      "",
+                      "ПРОВЕРЬТЕ:",
+                      "1. Техническая точность API и примеров",
+                      "2. Консистентность терминологии (русский + английские термины)",
+                      "3. Структура с эмодзи в H2 заголовках",
+                      "4. Полнота и ясность объяснений",
+                      "5. Грамматика и стиль",
+                      "6. Соответствие CLAUDE.md конвенциям",
+                      "",
+                      "ФОРМАТ ОТВЕТА:",
+                      "### ✅ Что хорошо",
+                      "### ⚠️  Предупреждения", 
+                      "### ❌ Критические ошибки",
+                      "### 💡 Рекомендации",
+                      "### 📊 Оценка: X/10",
+                      "",
+                      "---",
+                      "СОДЕРЖИМОЕ ФАЙЛА:",
+                      content[:4000]  # Limit content for API
+                  ]
+                  
+                  prompt = "\n".join(prompt_lines)
+                  
+                  try:
+                      response = model.generate_content(prompt)
+                      if response.text:
+                          reviews.append(f"## 📄 {filepath}\n\n{response.text}\n\n---\n")
+                      else:
+                          reviews.append(f"## 📄 {filepath}\n\n⚠️ **Предупреждение**: Получен пустой ответ от Gemini API\n\n---\n")
+                  except Exception as api_error:
+                      print(f"❌ API error for {filepath}: {api_error}")
+                      reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка API**: {str(api_error)}\n\n---\n")
+                  
+              except Exception as e:
+                  print(f"❌ File processing error for {filepath}: {e}")
+                  reviews.append(f"## 📄 {filepath}\n\n❌ **Ошибка обработки файла**: {str(e)}\n\n---\n")
+          
+          # Write review
+          with open('review_output.md', 'w', encoding='utf-8') as f:
+              f.write("# 🤖 Gemini Documentation Review\n\n")
+              f.write(f"**Проверено файлов:** {len(changed_files)}\n\n")
+              f.write("---\n\n")
+              f.write('\n'.join(reviews))
+              f.write("\n---\n\n")
+              f.write("*Автоматический обзор от Gemini AI*\n")
+          
+          # Print summary
+          print("\n📊 Review completed successfully")
+          EOF
+
+      - name: Run review
+        if: steps.changed-files.outputs.has_changes == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python3 review_script.py
+
+      - name: Post review as comment
+        if: steps.changed-files.outputs.has_changes == 'true' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            if (!fs.existsSync('review_output.md')) {
+              console.log('❌ No review output found');
+              return;
+            }
+            
+            try {
+              const review = fs.readFileSync('review_output.md', 'utf8');
+              
+              // Truncate if too long (GitHub comment limit is ~65536 chars)
+              const maxLength = 65000;
+              const finalReview = review.length > maxLength 
+                ? review.substring(0, maxLength) + '\n\n---\n\n*Обзор сокращен из-за ограничений длины комментария GitHub*'
+                : review;
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: finalReview
+              });
+              
+              console.log('✅ Review comment posted successfully');
+              
+            } catch (error) {
+              console.log('❌ Failed to post review comment:', error.message);
+              
+              // Post a fallback comment about the error
+              try {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `## 🤖 Gemini Documentation Review\n\n❌ **Ошибка**: Не удалось выполнить обзор документации.\n\n**Причина**: ${error.message}\n\n*Проверьте логи GitHub Actions для подробностей.*`
+                });
+                console.log('✅ Fallback error comment posted');
+              } catch (fallbackError) {
+                console.log('❌ Failed to post fallback comment:', fallbackError.message);
+              }
+            }
